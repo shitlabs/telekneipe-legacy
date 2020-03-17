@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap');
+
+h3 {
+    font-family: "Press Start 2P", "Courier New", Courier, monospace;
+    font-size:12pt;
+}
+
+#call_pad
+{
+    border-top:8px solid #000;
+    width:50%;
+    /*height:45%;*/
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    text-align: center;
+    display: none;
+
+}
+
+#table_container
+{
+    border-top:8px solid #000;
+    width:75%;
+    /*height:45%;*/
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    text-align: center;
+    display: none;
+}
+
+#video-container {
+  padding: 25px;
+  text-align: center;
+}
+
+
+#canvas {
+  margin-top: 15px;
+  width: 280px;
+  height: auto;
+  background-color: #eee;
+  display: none;
+}
+
+#step1-error, #step1 {
+  display: none;
+}

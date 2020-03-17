@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The only thing we know about cyberspace is that is serves Sterni">
+    <meta name="author" content="shitcrew">
+
+    <title>T*E*L*E*K*N*E*I*P*E</title>
+
+    <link rel="stylesheet" href="css/fabulation.css">
+    <link rel="stylesheet" href="css/telekneipe.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> 
+    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+    <script type="text/javascript" src="./seriously.js"></script>
+    <script type="text/javascript" src="https://brianchirls.github.io/Seriously.js/effects/seriously.brightness-contrast.js"></script>
+    <script type="text/javascript" src="https://brianchirls.github.io/Seriously.js/effects/seriously.pixelate.js"></script>
+    <script type="text/javascript" src="https://brianchirls.github.io/Seriously.js/effects/seriously.hue-saturation.js"></script>
+    <script type="text/javascript" src="https://pixijs.download/release/pixi.min.js"></script>
+    <script src="js/howler.min.js"></script>
+    <script src="js/fabulation.js"></script>
+    <script src="js/telekneipe.js"></script>
+  </head>
+
+  <body>
+    <div class="bg">
+    </div>
+    <div class="content">
+      <!-- TELEKNEIPE Modals -->
+      <div id="step1">
+          <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for transmission.</p>
+          <div id="step1-error">
+            <p>Failed to access the webcam and microphone. </p>
+            <a href="#" class="pure-button pure-button-error" id="step1-retry">Try again</a>
+          </div>
+      </div>
+      <div id="call_pad">
+        <h3>"Who are you looking for?"</h3>
+        <div class="pure-form">
+          <input type="text" placeholder="User id..." id="callto-id">
+          <a href="#" class="clickbutton" id="make-call">Have a look</a>
+        </div>
+      </div>
+      <div id="table_container">
+        <p>The robot hands you a slip of paper:<p>
+        <h3>"Your id: <span id="my-id">...</span>"</h3>        
+        <div class="pure-u-2-3" id="video-container">
+          <canvas id="screen"></canvas>
+          <canvas id="canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- FABULATION -->
+        <div class="disp">
+        </div>
+        <div class="center-scene">
+              {% for scene in contexts %}
+              <div id="{{ scene.id }}" style="display: none;">
+              {{ scene.content }}
+              </div>
+              {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        var meta = {{ meta }};
+
+        $(function() {
+            start_fabulation(meta)(meta["{{ root }}"])
+        })
+    </script>
+  </body>
+</html>
