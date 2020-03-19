@@ -1,17 +1,18 @@
 
 function start_fabulation(meta)
 {
-    function start_scene( tgt )
+    let self = this
+    self.start_scene = function( tgt )
     {
-        for (feature in features)
+        for (feature in self.features)
         {
-            features[feature].start_scene(tgt)
+            self.features[feature].start_scene(tgt)
         }
-    }
+    };
     
-    var fadetime = 500
+    self.fadetime = 500;
 
-    var features = 
+    self.features = 
     {
         audio : 
         {
@@ -32,11 +33,11 @@ function start_fabulation(meta)
                 if(this.cur)
                 {
                     this.sounds[this.cur].on("fade", f, this.hdl)
-                    this.sounds[this.cur].fade(1, 0, fadetime, this.hdl)
+                    this.sounds[this.cur].fade(1, 0, self.fadetime, this.hdl)
                 }
                 else
                 {
-                    setTimeout( f, fadetime )
+                    setTimeout( f, self.fadetime )
                 }
             },
             start_scene : function(tgt) 
@@ -83,17 +84,17 @@ function start_fabulation(meta)
             {
                 if( attrib in tgt && tgt[attrib] != this.cur[attrib] )
                 {
-                    $(display).animate({opacity:0}, fadetime, (function() { 
+                    $(display).animate({opacity:0}, self.fadetime, (function() { 
                         this.cur[attrib] = tgt[attrib]
                         pic_url = "url(" + tgt[attrib] + ")"
                         $(display).css('background-image', pic_url)
-                        $(display).animate({opacity:1}, fadetime)
+                        $(display).animate({opacity:1}, self.fadetime)
                     }).bind(this) )
                 }
                 else if(!(attrib in tgt) && this.cur[attrib] != "")
                 {
                     this.cur[attrib] = ""
-                    $(display).animate({opacity:0}, fadetime)
+                    $(display).animate({opacity:0}, self.fadetime)
                 }
             },
             start_scene : function(tgt)
@@ -136,7 +137,7 @@ function start_fabulation(meta)
                 return (function(event)
                 {
                     this.unbind_src(event, src)
-                    start_scene(tgt)
+                    self.start_scene(tgt)
                 }).bind(this)
             },
             get_click_back : function(src, n)
@@ -150,7 +151,7 @@ function start_fabulation(meta)
                         tgt_id = this.hist[this.hist.length-n-1]
                         this.hist = this.hist.slice(0,this.hist.length-n-1)
 
-                        start_scene(meta[tgt_id])
+                        self.start_scene(meta[tgt_id])
                     }
                 }).bind(this)
             },
@@ -192,21 +193,21 @@ function start_fabulation(meta)
                         }
                     }
 
-                    $("#"+tgt.id).fadeIn(fadetime)
+                    $("#"+tgt.id).fadeIn(self.fadetime)
                 }
 
                 if( this.cur )
                 {
-                    $("#"+this.cur).fadeOut(fadetime, show_new_text.bind(this))
+                    $("#"+this.cur).fadeOut(self.fadetime, show_new_text.bind(this))
                 }
                 else
                 {
-                    setTimeout(show_new_text.bind(this), fadetime)
+                    setTimeout(show_new_text.bind(this), self.fadetime)
                 }
 
             }
         }
-    }
+    };
 
     $(".disp").css("opacity", "0")
     $(".bg").css("opacity", "0")
@@ -216,11 +217,11 @@ function start_fabulation(meta)
         obj = meta[objid]
         obj.id = objid
 
-        for (feature in features)
+        for (feature in self.features)
         {
-            features[feature].init( obj )
+            self.features[feature].init( obj )
         }
     }
 
-    return start_scene
 }
+

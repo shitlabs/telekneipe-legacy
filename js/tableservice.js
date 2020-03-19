@@ -1,14 +1,20 @@
-(function () {
 
 
-  // Note: This requires that fabulation is parsed before tableservice...
-  function patch_fabulation(descriptor,start_scene,init=() => {}) {
-    const reserverd = ["audio","pic","text"];
-    if !(reserved.includes(descriptor)) {
-      start_fabulation.features[descriptor].start_scene = start_scene;
-      start_fabulation.features[descriptor].init = init;
+var patch_fabulation = () => {};
+
+function init_fabulation_and_tableservice(meta) {
+    var ref_fabulation = new start_fabulation(meta);
+    patch_fabulation = function(descriptor,start_scene,init=()=>{}) {
+    	const reserved = ["audio","pic","text"];
+    	if (!reserved.includes(descriptor)) {
+   	    ref_fabulation.features[descriptor] = {"start_scene": start_scene, "init": init};
+    	}
     }
-  }
+    init_tableservice();
+    return ref_fabulation;
+}
+
+function init_tableservice() {
 
   // Global defines in tableservice namespace
   var localStream = null;
@@ -239,25 +245,26 @@
 
 
 
-  patch_fabulation("tableservice",(tgt) => {
+  patch_fabulation("tableservice",function(tgt) {
+	  console.log(tgt)
     if ("host" in tgt) {
-      if !(localStream) {
+      if (!localStream) {
         $("#step1").show()
         initWebcamStream();
       }
       // display our scene      
-      ${'#table_container'}.show();
+      $('#table_container').show();
       // maybe set text so that it's clear what the table's name is?
     }
 
     if ("call" in tgt) {
-      if !(localStream) {
+      if (!localStream) {
         $("#step1").show()        
         initWebcamStream();
       }
 
       // display the call screen
-      ${'#call_pad'}.show();
+      $('#call_pad').show();
 
     }
 
@@ -272,7 +279,7 @@
       }
       connected_peers = [];
       // hide 
-      ${'#table_container'}.hide();      
+      $('#table_container').hide();      
     }
 
   });
@@ -304,7 +311,7 @@
   // Receiving a call
   peer.on('call', function(call){
     // Answer the call automatically (instead of prompting user) for demo purposes
-    if localStream == null {
+    if (localStream == null) {
       // do some emergency display action
       // TODO
     }
@@ -327,9 +334,9 @@
   $(function(){
     $('#make-call').click(function(){
       // display our scene
-      ${'#table_container'}.show();
+      $('#table_container').show();
       // hide callpad
-      ${'#call_pad'}.hide();
+      $('#call_pad').hide();
     	// Open a data connection
     	let people_to_call = [$('#callto-id').val()];
     	let connection = peer.connect($('#callto-id').val());
@@ -366,5 +373,5 @@
 
 
 
-}());
+}
 
