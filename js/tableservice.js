@@ -317,7 +317,8 @@
 
   peer.on('error', function(err){
     alert(err.message);
-    // Return to step 2 if error occurs
+    // Clean up our state and UI when error occurs? 
+    // Hard to say on which call the error occured though :(
   });
 
 
@@ -331,7 +332,7 @@
       ${'#call_pad'}.hide();
     	// Open a data connection
     	let people_to_call = [$('#callto-id').val()];
-    	var connection = peer.connect($('#callto-id').val());
+    	let connection = peer.connect($('#callto-id').val());
     	connection.on('open',() => {
     		connection.on('data',(data) => {
     			console.log(data);
@@ -340,7 +341,11 @@
     					people_to_call.push(new_peer);
     				}
     			}
-    			
+          // for now close the connection, once we've received a list of peers,
+          // there is no need to keep the data connection open.
+          // This might change, when we introduce more functions
+          // Then: Keep track of connection and it might make sense to keep it open.
+          connection.close();    			
     		});     		
     	});
       // Initiate a call!
