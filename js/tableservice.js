@@ -292,11 +292,13 @@ function init_tableservice() {
           let people_to_call = [$('#callto-id').val()];
           console.log("Received connected peers from remote");
     			console.log(data);
-    			for (var new_peer in data) {
-    				if (!connected_peers.includes(new_peer) && (new_peer != peer.id)) {
-    					people_to_call.push(new_peer);
-    				}
-    			}
+          if(data) {
+      			for (var new_peer in data) {
+      				if (!connected_peers.includes(new_peer) && (new_peer != peer.id)) {
+      					people_to_call.push(new_peer);
+      				}
+      			}
+          }
           // for now close the connection, once we've received a list of peers,
           // there is no need to keep the data connection open.
           // This might change, when we introduce more functions
