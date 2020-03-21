@@ -196,7 +196,7 @@ function init_tableservice() {
       webcamvideo.srcObject = stream;
       webcamvideo.play();
 
-      if (seriouslyStatus && canvas.captureStream) {
+      if (!seriouslyFail && canvas.captureStream) {
         // video effects are supported
         seriously.go();
         // mix streams for audio forwarding
@@ -339,6 +339,12 @@ function init_tableservice() {
 
       // display the call screen
       $('#call_pad').show();
+
+    });
+
+    $('#catch_events').on("tableservice.hide_call", function() {
+      $("#step1").hide()        
+      $('#call_pad').hide();
 
     });
 

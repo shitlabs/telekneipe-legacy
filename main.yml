@@ -42,6 +42,7 @@ interior:
         - [An die Bar treten](counter)"
 
 counter:
+    onEntrance: tableservice.end
     content: "Aus der Nähe erkennst du, dass es sich beim Barkeeper um einen Automaten handelt. Als du dich näherst hörst du wie das Summen lauter wird. Der Ton von schwingenden Zahnrädern erklingt.
 
         ### Welcome to the Telebar. How may I help you?
@@ -66,5 +67,5 @@ table_sit:
 
 call:
     onEntrance: tableservice.call
-    onExit: tableservice.end
+    onExit: tableservice.hide_call
     content: "- [Zurück zum Tresen](BACK1)"
