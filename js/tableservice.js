@@ -249,6 +249,8 @@ function init_tableservice() {
   peer.on('connection', (conn) => {
   	// TODO: Ask user for connection permission?
   	conn.on('open', () => {
+      console.log("Sending connected_peers");
+      console.log(connected_peers);
   		conn.send(connected_peers);
   	});
   	
@@ -288,6 +290,7 @@ function init_tableservice() {
     	let connection = peer.connect($('#callto-id').val());
     	connection.on('open',() => {
     		connection.on('data',(data) => {
+          console.log("Received connected peers from remote");
     			console.log(data);
     			for (var new_peer in data) {
     				if (!connected_peers.includes(new_peer) && (new_peer != peer.id)) {
@@ -299,14 +302,18 @@ function init_tableservice() {
           // This might change, when we introduce more functions
           // Then: Keep track of connection and it might make sense to keep it open.
           connection.close();    			
+          // Initiate the calls!
+          for (var call_this_peer in people_to_call) {
+            console.log("Calling new peer");
+            console.log(call_this_peer);
+            let call = peer.call($(call_this_peer, localStream);
+
+            processCall(call);
+          }
+
     		});     		
     	});
-      // Initiate a call!
-      for (var call_this_peer in people_to_call) {
-      	let call = peer.call($('#callto-id').val(), localStream);
 
-      	processCall(call);
-      }
     });
 
     // Retry if getUserMedia fails
