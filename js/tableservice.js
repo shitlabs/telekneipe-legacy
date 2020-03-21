@@ -7,8 +7,8 @@ function init_tableservice() {
 
   var positions = [{x:0, y:0},{x:266, y:0},{x:266*2, y:0},
           {x:0, y:266},{x:266, y:266},{x:266*2, y:266}];
-  var allocated_slots = [];
-  allocated_slots.fill(false,0,positions.size);
+  var allocated_slots = new Array(positions.size);
+  allocated_slots.fill(false);
 
   var known_peers = [];
   var connected_peers = [];
@@ -145,8 +145,8 @@ function init_tableservice() {
 
 
       // placement: Find free slot, get position
-      ind_slot = allocated_slots.findIndex(element => !element);
-
+      let ind_slot = allocated_slots.findIndex(element => !element);
+      
       container.x = positions[ind_slot].x
       container.y = positions[ind_slot].y;
 
