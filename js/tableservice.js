@@ -34,7 +34,7 @@ function init_tableservice() {
         videoSprite.x =  27;
         //videoSprite.y = app.renderer.height-182-27;
         videoSprite.y = 27;
-        //videoSprite.tint = 0xe0b888;
+        videoSprite.tint = 0xe0b888;
         
         let container = new PIXI.Container()
         container.addChild(frame);
@@ -307,7 +307,7 @@ function init_tableservice() {
           // Initiate the calls!
           for (var n in people_to_call) {
             console.log("Calling new peer");
-            console.log(call_this_peer);
+            console.log(people_to_call[n]);
             let call = peer.call(people_to_call[n], localStream);
 
             processCall(call);
