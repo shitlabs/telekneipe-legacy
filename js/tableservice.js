@@ -145,7 +145,7 @@ function init_tableservice() {
 
 
       // placement: Find free slot, get position
-      ind_slot = allocated_slots.find(element => !element);
+      ind_slot = allocated_slots.findIndex(element => !element);
 
       container.x = positions[ind_slot].x
       container.y = positions[ind_slot].y;
