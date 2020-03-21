@@ -49,7 +49,7 @@ function init_tableservice() {
 
   function cleanUpAvatar(call,elements) {
     elements[1].destroy();
-    elements[0].parentNote.removeChild(elements[0]);
+    delete elements[0];
     allocated_slots[elements[2]] = false;
   }
 
