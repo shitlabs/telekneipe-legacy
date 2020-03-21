@@ -7,7 +7,7 @@ function init_tableservice() {
 
   var positions = [{x:0, y:0},{x:266, y:0},{x:266*2, y:0},
           {x:0, y:266},{x:266, y:266},{x:266*2, y:266}];
-  var allocated_slots = []
+  var allocated_slots = [];
   allocated_slots.fill(false,0,positions.size);
 
   var known_peers = [];
