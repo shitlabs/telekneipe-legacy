@@ -285,11 +285,11 @@ function init_tableservice() {
       $('#table_container').show();
       // hide callpad
       $('#call_pad').hide();
-    	// Open a data connection
-    	let people_to_call = [$('#callto-id').val()];
+    	// Open a data connection    	
     	let connection = peer.connect($('#callto-id').val());
     	connection.on('open',() => {
     		connection.on('data',(data) => {
+          let people_to_call = [$('#callto-id').val()];
           console.log("Received connected peers from remote");
     			console.log(data);
     			for (var new_peer in data) {
