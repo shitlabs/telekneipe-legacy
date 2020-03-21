@@ -306,7 +306,7 @@ function init_tableservice() {
           for (var call_this_peer in people_to_call) {
             console.log("Calling new peer");
             console.log(call_this_peer);
-            let call = peer.call($(call_this_peer, localStream);
+            let call = peer.call(call_this_peer, localStream);
 
             processCall(call);
           }
