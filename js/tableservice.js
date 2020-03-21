@@ -295,7 +295,7 @@ function init_tableservice() {
           if(data) {
       			for (var new_peer in data) {
       				if (!connected_peers.includes(new_peer) && (new_peer != peer.id)) {
-      					people_to_call.push(new_peer);
+      					people_to_call.push(data[new_peer]);
       				}
       			}
           }
@@ -305,10 +305,10 @@ function init_tableservice() {
           // Then: Keep track of connection and it might make sense to keep it open.
           connection.close();    			
           // Initiate the calls!
-          for (var call_this_peer in people_to_call) {
+          for (var n in people_to_call) {
             console.log("Calling new peer");
             console.log(call_this_peer);
-            let call = peer.call(call_this_peer, localStream);
+            let call = peer.call(people_to_call[n], localStream);
 
             processCall(call);
           }
