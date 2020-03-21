@@ -320,7 +320,7 @@ function init_tableservice() {
 
     // bind events triggered from fabulation
     // these should bubble up to the content-class div #catch_events
-    $('catch_events').on("tableservice.host", function() {
+    $('#catch_events').on("tableservice.host", function() {
       if (!localStream) {
         $("#step1").show()
         initWebcamStream();
@@ -331,7 +331,7 @@ function init_tableservice() {
 
     });
 
-    $('catch_events').on("tableservice.call", function() {
+    $('#catch_events').on("tableservice.call", function() {
       if (!localStream) {
         $("#step1").show()        
         initWebcamStream();
@@ -342,7 +342,7 @@ function init_tableservice() {
 
     });
 
-    $('catch_events').on("tableservice.end", function() {
+    $('#catch_events').on("tableservice.end", function() {
       // end call
       for (let [key, value] of existingCalls) {
         cleanUpAvatar(key,value);
