@@ -1,19 +1,4 @@
 
-
-var patch_fabulation = () => {};
-
-function init_fabulation_and_tableservice(meta) {
-    var ref_fabulation = new start_fabulation(meta);
-    patch_fabulation = function(descriptor,start_scene,init=()=>{}) {
-    	const reserved = ["audio","pic","text"];
-    	if (!reserved.includes(descriptor)) {
-   	    ref_fabulation.features[descriptor] = {"start_scene": start_scene, "init": init};
-    	}
-    }
-    init_tableservice();
-    return ref_fabulation;
-}
-
 function init_tableservice() {
 
   // Global defines in tableservice namespace
@@ -245,45 +230,6 @@ function init_tableservice() {
 
 
 
-  patch_fabulation("tableservice",function(tgt) {
-	  console.log(tgt)
-    if ("host" in tgt) {
-      if (!localStream) {
-        $("#step1").show()
-        initWebcamStream();
-      }
-      // display our scene      
-      $('#table_container').show();
-      // maybe set text so that it's clear what the table's name is?
-    }
-
-    if ("call" in tgt) {
-      if (!localStream) {
-        $("#step1").show()        
-        initWebcamStream();
-      }
-
-      // display the call screen
-      $('#call_pad').show();
-
-    }
-
-    if ("end" in tgt) {
-      // end call
-      for (let [key, value] of existingCalls) {
-        cleanUpAvatar(key,value);
-        // end call
-        key.close();
-        // remove element
-        existingCalls.delete(key);
-      }
-      connected_peers = [];
-      // hide 
-      $('#table_container').hide();      
-    }
-
-  });
-
 
 
 
@@ -368,6 +314,50 @@ function init_tableservice() {
       $('#step1-error').hide();
       initWebcamStream();
     });
+
+
+
+
+    // bind events triggered from fabulation
+    // these should bubble up to the content-class div #catch_events
+    $('catch_events').on("tableservice.host", function() {
+      if (!localStream) {
+        $("#step1").show()
+        initWebcamStream();
+      }
+      // display our scene      
+      $('#table_container').show();
+      // maybe set text so that it's clear what the table's name is?
+
+    });
+
+    $('catch_events').on("tableservice.call", function() {
+      if (!localStream) {
+        $("#step1").show()        
+        initWebcamStream();
+      }
+
+      // display the call screen
+      $('#call_pad').show();
+
+    });
+
+    $('catch_events').on("tableservice.end", function() {
+      // end call
+      for (let [key, value] of existingCalls) {
+        cleanUpAvatar(key,value);
+        // end call
+        key.close();
+        // remove element
+        existingCalls.delete(key);
+      }
+      connected_peers = [];
+      // hide 
+      $('#table_container').hide();      
+    });
+
+
+
 
   });
 

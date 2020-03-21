@@ -24,7 +24,7 @@
   <body>
     <div class="bg">
     </div>
-    <div class="content">
+    <div class="content" id="catch_events">
       <!-- TELEKNEIPE Modals -->
       <div id="step1">
           <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for transmission.</p>
@@ -63,10 +63,13 @@
 
     <script>
         var meta = {{ meta }};
-	var hook = init_fabulation_and_tableservice(meta);
+
+
         $(function() {
-	    hook.start_scene(meta["{{ root }}"]);
+            start_fabulation(meta)(meta["{{ root }}"]);
+            init_tableservice();
         })
+
     </script>
   </body>
 </html>

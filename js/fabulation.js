@@ -1,18 +1,17 @@
 
 function start_fabulation(meta)
 {
-    let self = this
-    self.start_scene = function( tgt )
+    function start_scene( tgt )
     {
-        for (feature in self.features)
+        for (feature in features)
         {
-            self.features[feature].start_scene(tgt)
+            features[feature].start_scene(tgt)
         }
-    };
+    }
     
-    self.fadetime = 500;
+    var fadetime = 500
 
-    self.features = 
+    var features = 
     {
         audio : 
         {
@@ -33,11 +32,11 @@ function start_fabulation(meta)
                 if(this.cur)
                 {
                     this.sounds[this.cur].on("fade", f, this.hdl)
-                    this.sounds[this.cur].fade(1, 0, self.fadetime, this.hdl)
+                    this.sounds[this.cur].fade(1, 0, fadetime, this.hdl)
                 }
                 else
                 {
-                    setTimeout( f, self.fadetime )
+                    setTimeout( f, fadetime )
                 }
             },
             start_scene : function(tgt) 
@@ -84,17 +83,17 @@ function start_fabulation(meta)
             {
                 if( attrib in tgt && tgt[attrib] != this.cur[attrib] )
                 {
-                    $(display).animate({opacity:0}, self.fadetime, (function() { 
+                    $(display).animate({opacity:0}, fadetime, (function() { 
                         this.cur[attrib] = tgt[attrib]
                         pic_url = "url(" + tgt[attrib] + ")"
                         $(display).css('background-image', pic_url)
-                        $(display).animate({opacity:1}, self.fadetime)
+                        $(display).animate({opacity:1}, fadetime)
                     }).bind(this) )
                 }
                 else if(!(attrib in tgt) && this.cur[attrib] != "")
                 {
                     this.cur[attrib] = ""
-                    $(display).animate({opacity:0}, self.fadetime)
+                    $(display).animate({opacity:0}, fadetime)
                 }
             },
             start_scene : function(tgt)
@@ -103,6 +102,24 @@ function start_fabulation(meta)
                 this.change_pic(tgt, "fullpic", ".bg")
             }
         },
+        event : 
+        {
+            init : function(obj)
+            {
+                if ("enter" in obj) {
+                    $("#"+obj.id).on("scene.entrance", function() {
+                        $("#"+obj.id).trigger(obj["enter"])
+                    })
+                }
+
+                if ("exit" in obj) {
+                    $("#"+obj.id).on("scene.exit", function() {
+                        $("#"+obj.id).trigger(obj["exit"])
+                    })
+                }
+            }
+
+        },        
         text : 
         {
             cur : "",
@@ -137,7 +154,7 @@ function start_fabulation(meta)
                 return (function(event)
                 {
                     this.unbind_src(event, src)
-                    self.start_scene(tgt)
+                    start_scene(tgt)
                 }).bind(this)
             },
             get_click_back : function(src, n)
@@ -151,7 +168,7 @@ function start_fabulation(meta)
                         tgt_id = this.hist[this.hist.length-n-1]
                         this.hist = this.hist.slice(0,this.hist.length-n-1)
 
-                        self.start_scene(meta[tgt_id])
+                        start_scene(meta[tgt_id])
                     }
                 }).bind(this)
             },
@@ -193,21 +210,23 @@ function start_fabulation(meta)
                         }
                     }
 
-                    $("#"+tgt.id).fadeIn(self.fadetime)
+                    $("#"+tgt.id).fadeIn(fadetime)
+                    $("#"+tgt.id).trigger("scene.entrance")
                 }
 
                 if( this.cur )
                 {
-                    $("#"+this.cur).fadeOut(self.fadetime, show_new_text.bind(this))
+                    $("#"+this.cur).trigger("scene.exit")
+                    $("#"+this.cur).fadeOut(fadetime, show_new_text.bind(this))
                 }
                 else
                 {
-                    setTimeout(show_new_text.bind(this), self.fadetime)
+                    setTimeout(show_new_text.bind(this), fadetime)
                 }
 
             }
         }
-    };
+    }
 
     $(".disp").css("opacity", "0")
     $(".bg").css("opacity", "0")
@@ -217,11 +236,11 @@ function start_fabulation(meta)
         obj = meta[objid]
         obj.id = objid
 
-        for (feature in self.features)
+        for (feature in features)
         {
-            self.features[feature].init( obj )
+            features[feature].init( obj )
         }
     }
 
+    return start_scene
 }
-
