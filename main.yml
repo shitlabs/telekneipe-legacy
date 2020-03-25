@@ -2,6 +2,7 @@
 root:
     fullpic: pics/dachterrasse.jpg
     content: "### [TELEKNEIPE](exterior)"
+    onExit: tableservice.about    
 
 exterior:
     content: "In der ferner Zukunft, in einer postapokalyptischen Ruine einer Stadt stehst du an einer leeren Straßenkreuzung vor einem Gebäude. Das Ladengeschäft im Erdgeschoss ist überwachsen von Pflanzen und einige der großen Fensterflächen sind gebrochen und überklebt.
