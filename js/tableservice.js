@@ -31,7 +31,7 @@ function init_tableservice() {
       frame.y = 0
 
       //let texture = PIXI.Texture.from();
-      let videoSprite = PIXI.Sprite.from(videoElement);
+      let videoSprite = PIXI.Sprite.from(this.videoElement);
       videoSprite.width = 182;
       videoSprite.height = 182;
       videoSprite.x =  27;
@@ -170,7 +170,7 @@ function init_tableservice() {
   });
 
   function showReceipt() {
-    $("receipt").show();
+    $(".receipt").show();
   }
 
   function processCall (call) {
@@ -196,7 +196,7 @@ function init_tableservice() {
       let newFrame = new VideoFrame(stream,call.peer,ind_slot);
       
 
-      if (ind_slot) < 0 {
+      if (ind_slot < 0) {
         logToReceipt("Space on your table is running out, someone will have to keep standing.");
       } else {
         newFrame.container.x = positions[ind_slot].x
