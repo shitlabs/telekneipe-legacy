@@ -88,17 +88,17 @@ h3 {
 } 
 
 /* Modal Header */
-.modal .content .header {
+.modal-content-header {
   padding: 2px 16px;
   background-color: #333;
   color: white;
 }
 
-.modal .content .body {
+.modal-content-body {
   padding: 2px 16px 16px;
 }
 /* Modal Content */
-.modal .content {
+.modal-content {
   position: relative;
   padding:0;
   height:auto;
@@ -135,14 +135,14 @@ h3 {
     display:none;
 }
 
-.receipt .top {
+.receipt-top {
     height: 8px;
     background-image: url("./../pics/sawtooth_top.png");
     background-repeat: repeat-x;
     background-size: 8px 8px;
     image-rendering: pixelated;
 }
-.receipt .header {
+.receipt-header {
     position: relative;
     display:block;
     padding: 8px;
@@ -166,7 +166,7 @@ h3 {
     
 
 }
-.receipt .close {
+.receipt-close {
     float: right;
     height: 10px;
     image-rendering: pixelated;

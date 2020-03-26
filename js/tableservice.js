@@ -196,7 +196,7 @@ function init_tableservice() {
       let newFrame = new VideoFrame(stream,call.peer,ind_slot);
       
 
-      if ind_slot < 0 {
+      if (ind_slot) < 0 {
         logToReceipt("Space on your table is running out, someone will have to keep standing.");
       } else {
         newFrame.container.x = positions[ind_slot].x
