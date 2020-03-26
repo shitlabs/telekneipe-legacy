@@ -14,43 +14,80 @@ function init_tableservice() {
   var connected_peers = [];
 
 
-  function newVideoFrame(stream) {
+  class VideoFrame {
+    constructor(stream,callId,slotIndex=-1) {
+      this.remoteId = callId;
+      this.slotIndex = slotIndex;
       //webcam to sprite
-        let videoElement = document.createElement("video");         
-        videoElement.autoplay = true;
-        videoElement.playsinline = true;
-        videoElement.srcObject = stream;
-        videoElement.play();
+      this.videoElement = document.createElement("video");         
+      this.videoElement.autoplay = true;
+      this.videoElement.playsinline = true;
+      this.videoElement.srcObject = stream;
+      this.videoElement.play();
 
-        let frame = new PIXI.Sprite.from("pics/image_frame.png");
-        frame.x = 0;
-        //frame.y = app.renderer.height-235;
-        frame.y = 0
+      let frame = new PIXI.Sprite.from("pics/image_frame.png");
+      frame.x = 0;
+      //frame.y = app.renderer.height-235;
+      frame.y = 0
 
-        //let texture = PIXI.Texture.from();
-        let videoSprite = PIXI.Sprite.from(videoElement);
-        videoSprite.width = 182;
-        videoSprite.height = 182;
-        videoSprite.x =  27;
-        //videoSprite.y = app.renderer.height-182-27;
-        videoSprite.y = 27;
-        videoSprite.tint = 0xe0b888;
-        
-        let container = new PIXI.Container()
-        container.addChild(frame);
-        container.addChild(videoSprite);
-    return [videoElement,container];
+      //let texture = PIXI.Texture.from();
+      let videoSprite = PIXI.Sprite.from(videoElement);
+      videoSprite.width = 182;
+      videoSprite.height = 182;
+      videoSprite.x =  27;
+      //videoSprite.y = app.renderer.height-182-27;
+      videoSprite.y = 27;
+      videoSprite.tint = 0xe0b888;
+      
+      this.container = new PIXI.Container()
+      this.container.addChild(frame);
+      this.container.addChild(videoSprite);
+
+      this._internalVolume = 100;
+    }
+
+    toggleMute() {
+      this.videoElement.muted != this.videoElement.muted;
+    }
+
+    set volume(val) {
+      this.videoElement.volume = val;
+    }
+
+    get volume() {
+      this.videoElement.volume;
+    }
+
+    duck(vol=10) {
+      this._internalVolume = this.volume;
+      this.volume = vol;
+    }
+
+    unduck() {
+      this.volume = this._internalVolume;
     }
 
 
 
+  }
+
+
+  function logToReceipt(msg) {
+    $("#console").prepend(`<div class="msg">${msg}</div>`);
+    // make the button flash
+    $("#receiptButton").fadeOut("fast",function() {this.fadeIn(); });
+  }
 
 
 
-  function cleanUpAvatar(call,elements) {
-    elements[1].destroy();
-    delete elements[0];
-    allocated_slots[elements[2]] = false;
+
+  function cleanUpAvatar(call,instance) {
+    if (instance != undefined) {
+      if (instance.slotIndex>=0) {
+        allocated_slots[slotIndex] = false;
+      }    
+      delete instance;
+    }
   }
 
 
@@ -132,31 +169,49 @@ function init_tableservice() {
     view: document.getElementById("screen")
   });
 
+  function showReceipt() {
+    $("receipt").show();
+  }
 
   function processCall (call) {
     // Wait for stream on the call, then set peer video display
     call.on('stream', function(stream){
       // BUG as per https://github.com/peers/peerjs/issues/609. Check if call.peer already in existingCalls, if so... ignore?
-      if (existingCalls.has(call.peer)) return;
+      // TODO: This might be a bad decision, since we might get a re-call try from our peer, which would be ignored here? Investigate.
+      //if (existingCalls.has(call.peer)) return;
+      // TRIAL: Replace old stream. Let's see how this performs.
+      if (existingCalls.has(call.peer)) {
+        console.log("Peer already present, replacing stream");
+        cleanUpAvatar(call.peer,existingCalls.get(call.peer));
+        existingCalls.delete(call.peer);
+      }
 
-  
-      let remotevideo,container;
-      [remotevideo,container] = newVideoFrame(stream);
-
+      // TODO: Decide if table needs to be swapped.
 
       // placement: Find free slot, get position
       let ind_slot = allocated_slots.findIndex(element => !element);
+
       
-      container.x = positions[ind_slot].x
-      container.y = positions[ind_slot].y;
+      //let remotevideo,container;
+      let newFrame = new VideoFrame(stream,call.peer,ind_slot);
+      
+
+      if ind_slot < 0 {
+        logToReceipt("Space on your table is running out, someone will have to keep standing.");
+      } else {
+        newFrame.container.x = positions[ind_slot].x
+        newFrame.container.y = positions[ind_slot].y;
 
 
-      app.stage.addChild(container);
+        app.stage.addChild(newFrame.container);
 
-      // mark slot as used
-      allocated_slots[ind_slot] = true;
+        // mark slot as used
+        allocated_slots[ind_slot] = true;
+      }
+
+
       // insert entry into existingCalls
-      existingCalls.set(call.peer,[remotevideo,container,ind_slot]);
+      existingCalls.set(call.peer,newFrame);
 
     });
 
@@ -164,15 +219,10 @@ function init_tableservice() {
     // Register destructor
     call.on('close', function() {
       cleanUpAvatar(call.peer,existingCalls.get(call.peer));
-      existingCalls.delete(call);
+      existingCalls.delete(call.peer);
     });
 
-
-    // Display remote ID (TODO: This will only display last connection, probably we won't use it anyways)
-    //$('#their-id').text(call.peer);
-
-
-
+    // TODO: Clean these up
     $('#step1, #step2').hide();
     $('#step3').show();
   }
@@ -209,13 +259,16 @@ function init_tableservice() {
       }
 
       // create loopback video element and sprite
-      const [localvideoElement, localcontainer] = newVideoFrame(localStream);
-      localvideoElement.muted = true;
+      const localFrame = new VideoFrame(localStream,null,null);
+      localFrame.videoElement.muted = true;
   
       //sprite to canvas
-      localcontainer.y = app.renderer.height-235;
-      localcontainer.x = 0;
-      app.stage.addChild(localcontainer);
+      localFrame.container.y = app.renderer.height-235;
+      localFrame.container.x = 0;
+      // flip ourselv
+      localFrame.container.scale.x *= -1;
+
+      app.stage.addChild(localFrame.container);
 
 
 
@@ -234,8 +287,8 @@ function init_tableservice() {
 
 
   // PeerJS object
-  var peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:3, config: {'iceServers': [
-    { url: 'stun:stun.l.google.com:19302' } // Pass in optional STUN and TURN server for maximum network compatibility
+  var peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: {'iceServers': [
+    { urls: 'stun:stun.l.google.com:19302', url: 'stun:stun.l.google.com:19302' } // Pass in optional STUN and TURN server for maximum network compatibility
   ]}});
 
 
@@ -243,12 +296,14 @@ function init_tableservice() {
   // Output remotely assigned ID  
   peer.on('open', function(){
     $('#my-id').text(peer.id);
+    $('#receiptId').text(peer.id);
   });
 
   // Receive connection request
   peer.on('connection', (conn) => {
   	// TODO: Ask user for connection permission?
   	conn.on('open', () => {
+      logToReceipt(`${conn.peer} comes to the table.`)
       console.log("Sending connected_peers");
       console.log(connected_peers);
   		conn.send(connected_peers);
@@ -262,16 +317,19 @@ function init_tableservice() {
     if (localStream == null) {
       // do some emergency display action
       // TODO
+      console.error("Received call before initialization of webcam or our webcam stopped")
     }
     call.answer(localStream);
     if (!connected_peers.includes(call.peer)) {
     		connected_peers.push(call.peer);
     }
+    logToReceipt(`${call.peer} sat down at the table`);
     processCall(call);
   });
 
   peer.on('error', function(err){
-    alert(err.message);
+    logToReceipt(`An unknown error occured: ${err.message}`)
+    console.log(err.message);
     // Clean up our state and UI when error occurs? 
     // Hard to say on which call the error occured though :(
   });
@@ -299,6 +357,8 @@ function init_tableservice() {
       				}
       			}
           }
+          logToReceipt(`They present to you others at the table: ${people_to_call.toString()}`);
+          logToReceipt(`Arrived at ${$('#callto-id').val()}'s table.`);
           // for now close the connection, once we've received a list of peers,
           // there is no need to keep the data connection open.
           // This might change, when we introduce more functions
@@ -309,7 +369,10 @@ function init_tableservice() {
             console.log("Calling new peer");
             console.log(people_to_call[n]);
             let call = peer.call(people_to_call[n], localStream);
-
+            call.on("error", function(err) {
+              console.log(`An error occured with ${this.peer}: ${err.message}`);
+              logToReceipt(`An error occured with ${this.peer}: ${err.message}`);
+            })            
             processCall(call);
           }
 
@@ -334,6 +397,7 @@ function init_tableservice() {
         $("#step1").show()
         initWebcamStream();
       }
+      showReceipt();
       // display our scene      
       $('#table_container').show();
       // maybe set text so that it's clear what the table's name is?
@@ -345,7 +409,7 @@ function init_tableservice() {
         $("#step1").show()        
         initWebcamStream();
       }
-
+      showReceipt();
       // display the call screen
       $('#call_pad').show();
 
