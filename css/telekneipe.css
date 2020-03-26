@@ -170,4 +170,5 @@ h3 {
     float: right;
     height: 10px;
     image-rendering: pixelated;
+    display:none;
 }

@@ -15,9 +15,9 @@ function init_tableservice() {
 
 
   class VideoFrame {
-    constructor(stream,callId,slotIndex=-1) {
-      this.remoteId = callId;
-      this.slotIndex = slotIndex;
+    constructor(stream,selfie = false) {
+      this.remoteId = null;
+      this.slotIndex = null;
       //webcam to sprite
       this.videoElement = document.createElement("video");         
       this.videoElement.autoplay = true;
@@ -38,6 +38,7 @@ function init_tableservice() {
       //videoSprite.y = app.renderer.height-182-27;
       videoSprite.y = 27;
       videoSprite.tint = 0xe0b888;
+      if (selfie) videoSprite.texture.rotate = 12;
       
       this.container = new PIXI.Container()
       this.container.addChild(frame);
@@ -75,7 +76,7 @@ function init_tableservice() {
   function logToReceipt(msg) {
     $("#console").prepend(`<div class="msg">${msg}</div>`);
     // make the button flash
-    $("#receiptButton").fadeOut("fast",function() {this.fadeIn(); });
+    $("#receiptButton").fadeOut("fast",function() {$("#receiptButton").fadeIn(); });
   }
 
 
@@ -84,7 +85,7 @@ function init_tableservice() {
   function cleanUpAvatar(call,instance) {
     if (instance != undefined) {
       if (instance.slotIndex>=0) {
-        allocated_slots[slotIndex] = false;
+        allocated_slots[instance.slotIndex] = false;
       }    
       delete instance;
     }
@@ -193,7 +194,9 @@ function init_tableservice() {
 
       
       //let remotevideo,container;
-      let newFrame = new VideoFrame(stream,call.peer,ind_slot);
+      let newFrame = new VideoFrame(stream);
+      newFrame.remoteId = call.peer;
+      newFrame.slotIndex = ind_slot;
       
 
       if (ind_slot < 0) {
@@ -259,14 +262,13 @@ function init_tableservice() {
       }
 
       // create loopback video element and sprite
-      const localFrame = new VideoFrame(localStream,null,null);
+      var localFrame = new VideoFrame(localStream,true);
       localFrame.videoElement.muted = true;
   
       //sprite to canvas
       localFrame.container.y = app.renderer.height-235;
       localFrame.container.x = 0;
-      // flip ourselv
-      localFrame.container.scale.x *= -1;
+
 
       app.stage.addChild(localFrame.container);
 
