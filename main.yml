@@ -1,10 +1,12 @@
 ---
 root:
     fullpic: pics/dachterrasse.jpg
-    content: "### [TELEKNEIPE](exterior)"
+    content: "### TELEKNEIPE"
+    next: exterior
     onExit: tableservice.about    
 
 exterior:
+    pic: pics/Eckkneipe_Kreuzung_anim96.gif
     content: "In der ferner Zukunft, in einer postapokalyptischen Ruine einer Stadt stehst du an einer leeren Straßenkreuzung vor einem Gebäude. Das Ladengeschäft im Erdgeschoss ist überwachsen von Pflanzen und einige der großen Fensterflächen sind gebrochen und überklebt.
 
          Du willst bereits weiter ziehen, da siehst du aus dem Augenwinkel, hinter einem der Fenster, eine Bewegung.
@@ -13,6 +15,7 @@ exterior:
          - [Näher treten](exterior2)"
 
 exterior2:
+    pic: pics/Eckkneipe_Eingang.png
     content: "Über dem Eingang siehst du ein Neonschild, lang erloschen.
 
          ### BAR
@@ -26,6 +29,7 @@ exterior2:
          - [Schild lesen](awareness)"
 
 awareness:
+    pic: pics/Eckkneipe_Schild.png
     content: "Die Telekneipe bietet eine virtuelle Kneipenexperience. Dazu teilt ihr den Ton eures Mikrophons und das Bild eurer Webcam (euer Browser wird euch fragen, bevor diese Daten aufgenommen werden). Die Telekneipe selber hat keinen Zugriff auf diese Daten, sie hilft euch alleine bei der Vermittelung der Verbindung und der Darstellung des Videos der Teilnehmer*innen.
 
         Die Verbindung ist dabei Ende-zu-Ende Verschlüsselt mittels DTLS und SRTP (Teil des WebRTC Standards). Da es sich um experimentelle Software handelt, können wir nicht ausschließen, dass - böswillig oder zufällig - eure Konversation mitgehört werden kann. Den Quellcode der Telekneipe könnt ihr <a href=\"https://github.com/shitlabs/telekneipe\">hier</a> einsehen, eure Bugreports sind gerne willkommen!
@@ -57,9 +61,11 @@ table:
 
         sagt der Barkeeper, bewegt sich aber kein Stück. Im hinteren der Bar geht ein Spotlight an, es zeigt auf einen leeren Tisch.
 
-        - [An den Tisch setzen](table_sit)
+        Aus dem Treser erscheint ein Stück Papier.
 
-        - [Zurück](BACK1)"
+        - [Papier nehmen und an den Tisch setzen](table_sit)
+
+        - [...Warte!](BACK1)"
 
 table_sit:
     onEntrance: tableservice.host
