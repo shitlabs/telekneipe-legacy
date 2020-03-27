@@ -14,18 +14,36 @@ function init_tableservice() {
   var connected_peers = [];
 
 
+  const smallBitFont = PIXI.TextStyle({
+    fontFamily: ["Press Start 2P", "Courier New"],
+    fontStyle: "small-caps"
+    fontSize: 9,
+    wordWrap: true,
+    wordWrapWidth: 2
+  });
+
+  const FrameTexture = PIXI.Texture.from("pics/image_frame.png");
+  const FrameTexture_Filled = PIXI.Texture.from("pics/image_frame_filled.png");
+  const FrameVolIcon = PIXI.Texture.from("pics/volume.png");
+  const FrameMuteIcon = PIXI.Texture.from("pics/volume_mute.png");
+  const VideoIcon = PIXI.Texture.from("pics/video.png");
+  const VideoMuteIcon = PIXI.Texture.from("pics/video_mute.png");
+
+
   class VideoFrame {
-    constructor(stream,selfie = false) {
-      this.remoteId = null;
+    constructor(stream,selfie = false,peerId=null) {
+      this.remoteId = peerId;
       this.slotIndex = null;
+
+      this._stream = stream;
       //webcam to sprite
       this.videoElement = document.createElement("video");         
       this.videoElement.autoplay = true;
       this.videoElement.playsinline = true;
-      this.videoElement.srcObject = stream;
+      this.videoElement.srcObject = this._stream;
       this.videoElement.play();
 
-      let frame = new PIXI.Sprite.from("pics/image_frame.png");
+      let frame = new PIXI.Sprite(FrameTexture);
       frame.x = 0;
       //frame.y = app.renderer.height-235;
       frame.y = 0
@@ -39,16 +57,82 @@ function init_tableservice() {
       videoSprite.y = 27;
       videoSprite.tint = 0xe0b888;
       if (selfie) videoSprite.texture.rotate = 12;
+
+      this.backsideContainer = new.PIXI.Container()
+
+      let overlaySprite = PIXI.Sprite(FrameTexture_Filled);
+      overlaySprite.x = 0;
+      overlaySprite.y = 0;
+
+      this.backsideContainer.addChild(overlaySprite);
+
+      this.muteButton = PIXI.Sprite(FrameVolIcon);
+      this.muteButton.interactive = true;
+      this.muteButton.buttonMode = true;
+      this.muteButton.on("pointerdown",this.toggleMute);
+
+
+      if (this.selfie) {
+        this.videoMuteButton = PIXI.Sprite(VideoIcon);
+        this.videoMuteButton.interactive = true;
+        this.videoMuteButton.buttonMode = true;
+        this.videoMuteButton.on("pointerdown",this.videoMute);
+        this.videoMuteButton.x = 30;
+        this.videoMuteButton.y = 30;
+
+        this.backsideContainer.addChild(videoMuteButton);
+
+      } else {
+      if (this.remoteId && !this.selfie) {
+        let textId = PIXI.Text(this.remoteId, smallBitFont);
+        textId.x = 30;
+        textId.y = 30;
+        this.backsideContainer.addChild(textId);
+
+      }
+
+
+      this.backsideContainer.addChild(this.muteButton); // add late to keep in front.
+
+
+      this.backsideContainer.visible = false;
       
       this.container = new PIXI.Container()
       this.container.addChild(frame);
       this.container.addChild(videoSprite);
+      this.container.addChild(this.backsideContainer);
+
+      // event registration
+      this.backsideContainer.interactive = true;
+      this.backsideCointaner.on('pointerover', _showBack)
+        .on('pointerout', _hideBack);
 
       this._internalVolume = 100;
     }
 
+    _showBack() {
+      this.backsideContainer.visible = true;
+    }
+
+    _hideBack() {
+      this.backsideContainer.visible = false;
+    }
+
     toggleMute() {
-      this.videoElement.muted != this.videoElement.muted;
+      let state = false;
+      if (this.selfie) {
+        this._stream.getAudioTracks()[0].enabled = !this._stream.getAudioTracks()[0].enabled;
+        state = !this._stream.getAudioTracks()[0].enabled;
+      } else {
+        this.videoElement.muted = !this.videoElement.muted;
+        state = this.videoElement.muted;
+      }
+      this.muteButton.texture = state ? FrameMuteIcon : FrameVolIcon;
+    }
+
+    videoMute() {
+      this._stream.getVideoTracks()[0].enabled = !this._stream.getVideoTracks()[0].enabled;
+      this.videoButton.texture = this._stream.getVideoTracks()[0].enabled ? VideoIcon : VideoMuteIcon;
     }
 
     set volume(val) {
@@ -169,6 +253,9 @@ function init_tableservice() {
     height: 600,        // default: 400
     view: document.getElementById("screen")
   });
+
+  // never not be pixely :)
+  PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
   function showReceipt() {
     $(".receipt").show();
