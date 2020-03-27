@@ -35,6 +35,8 @@ function init_tableservice() {
       this.remoteId = peerId;
       this.slotIndex = null;
 
+      this.selfie = selfie
+
       this._stream = stream;
       //webcam to sprite
       this.videoElement = document.createElement("video");         
@@ -56,7 +58,7 @@ function init_tableservice() {
       //videoSprite.y = app.renderer.height-182-27;
       videoSprite.y = 27;
       videoSprite.tint = 0xe0b888;
-      if (selfie) videoSprite.texture.rotate = 12;
+      if (this.selfie) videoSprite.texture.rotate = 12;
 
       this.backsideContainer = new PIXI.Container();
 
@@ -106,8 +108,8 @@ function init_tableservice() {
 
       // event registration
       this.container.interactive = true;
-      this.container.on('pointerover', _showBack.bind(this))
-        .on('pointerout', _hideBack.bind(this));
+      this.container.on('pointerover', this._showBack.bind(this))
+        .on('pointerout', this._hideBack.bind(this));
 
       this._internalVolume = 100;
     }
