@@ -17,7 +17,7 @@ function init_tableservice() {
   const smallBitFont = new PIXI.TextStyle({
     fontFamily: ["Press Start 2P", "Courier New"],
     fontStyle: "small-caps",
-    fontSize: 9,
+    fontSize: 11,
     wordWrap: true,
     wordWrapWidth: 2
   });
@@ -35,7 +35,7 @@ function init_tableservice() {
       this.remoteId = peerId;
       this.slotIndex = null;
 
-      this.selfie = selfie
+      this.selfie = selfie;
 
       this._stream = stream;
       //webcam to sprite
@@ -71,8 +71,8 @@ function init_tableservice() {
       this.muteButton = new PIXI.Sprite(FrameVolIcon);
       this.muteButton.interactive = true;
       this.muteButton.buttonMode = true;
-      this.muteButton.x = 185;
-      this.muteButton.y = 30;
+      this.muteButton.x = 170;
+      this.muteButton.y = 45;
       this.muteButton.on("pointerdown",this.toggleMute.bind(this));
 
 
@@ -80,17 +80,17 @@ function init_tableservice() {
         this.videoMuteButton = new PIXI.Sprite(VideoIcon);
         this.videoMuteButton.interactive = true;
         this.videoMuteButton.buttonMode = true;
-        this.videoMuteButton.x = 30;
-        this.videoMuteButton.y = 30;
+        this.videoMuteButton.x = 45;
+        this.videoMuteButton.y = 45;
         this.videoMuteButton.on("pointerdown",this.videoMute.bind(this));
 
-        this.backsideContainer.addChild(videoMuteButton);
+        this.backsideContainer.addChild(this.videoMuteButton);
 
       } else {
         if (this.remoteId) {
-          let textId = new PIXI.Text(this.remoteId, smallBitFont);
-          textId.x = 30;
-          textId.y = 30;
+          let textId = new PIXI.Text(this.remoteId.replace(/-/g, "- "), smallBitFont);
+          textId.x = 40;
+          textId.y = 40;
           this.backsideContainer.addChild(textId);
         }
       }
