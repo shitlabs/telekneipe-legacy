@@ -96,6 +96,7 @@
               }
               else {
                 $("#modalWarning").html(`<p>Warnung: Während der Initialisierung wurde ein unerwarteter Fehler festgestellt.</p><p>Fehlermeldung: ${err}</p>`);
+                throw(err);
               }
             }
             // temporarily display info after first screen
