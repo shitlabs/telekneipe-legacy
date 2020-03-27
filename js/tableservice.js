@@ -16,7 +16,7 @@ function init_tableservice() {
 
   const smallBitFont = PIXI.TextStyle({
     fontFamily: ["Press Start 2P", "Courier New"],
-    fontStyle: "small-caps"
+    fontStyle: "small-caps",
     fontSize: 9,
     wordWrap: true,
     wordWrapWidth: 2
@@ -58,7 +58,7 @@ function init_tableservice() {
       videoSprite.tint = 0xe0b888;
       if (selfie) videoSprite.texture.rotate = 12;
 
-      this.backsideContainer = new.PIXI.Container()
+      this.backsideContainer = new PIXI.Container()
 
       let overlaySprite = PIXI.Sprite(FrameTexture_Filled);
       overlaySprite.x = 0;
@@ -83,12 +83,12 @@ function init_tableservice() {
         this.backsideContainer.addChild(videoMuteButton);
 
       } else {
-      if (this.remoteId && !this.selfie) {
-        let textId = PIXI.Text(this.remoteId, smallBitFont);
-        textId.x = 30;
-        textId.y = 30;
-        this.backsideContainer.addChild(textId);
-
+        if (this.remoteId) {
+          let textId = PIXI.Text(this.remoteId, smallBitFont);
+          textId.x = 30;
+          textId.y = 30;
+          this.backsideContainer.addChild(textId);
+        }
       }
 
 
@@ -281,7 +281,7 @@ function init_tableservice() {
 
       
       //let remotevideo,container;
-      let newFrame = new VideoFrame(stream);
+      let newFrame = new VideoFrame(stream,false,call.peer);
       newFrame.remoteId = call.peer;
       newFrame.slotIndex = ind_slot;
       
