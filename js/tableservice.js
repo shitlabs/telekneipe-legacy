@@ -14,7 +14,7 @@ function init_tableservice() {
   var connected_peers = [];
 
 
-  const smallBitFont = PIXI.TextStyle({
+  const smallBitFont = new PIXI.TextStyle({
     fontFamily: ["Press Start 2P", "Courier New"],
     fontStyle: "small-caps",
     fontSize: 9,
@@ -58,33 +58,35 @@ function init_tableservice() {
       videoSprite.tint = 0xe0b888;
       if (selfie) videoSprite.texture.rotate = 12;
 
-      this.backsideContainer = new PIXI.Container()
+      this.backsideContainer = new PIXI.Container();
 
-      let overlaySprite = PIXI.Sprite(FrameTexture_Filled);
+      let overlaySprite = new PIXI.Sprite(FrameTexture_Filled);
       overlaySprite.x = 0;
       overlaySprite.y = 0;
 
       this.backsideContainer.addChild(overlaySprite);
 
-      this.muteButton = PIXI.Sprite(FrameVolIcon);
+      this.muteButton = new PIXI.Sprite(FrameVolIcon);
       this.muteButton.interactive = true;
       this.muteButton.buttonMode = true;
-      this.muteButton.on("pointerdown",this.toggleMute);
+      this.muteButton.x = 185;
+      this.muteButton.y = 30;
+      this.muteButton.on("pointerdown",this.toggleMute.bind(this));
 
 
       if (this.selfie) {
-        this.videoMuteButton = PIXI.Sprite(VideoIcon);
+        this.videoMuteButton = new PIXI.Sprite(VideoIcon);
         this.videoMuteButton.interactive = true;
         this.videoMuteButton.buttonMode = true;
-        this.videoMuteButton.on("pointerdown",this.videoMute);
         this.videoMuteButton.x = 30;
         this.videoMuteButton.y = 30;
+        this.videoMuteButton.on("pointerdown",this.videoMute.bind(this));
 
         this.backsideContainer.addChild(videoMuteButton);
 
       } else {
         if (this.remoteId) {
-          let textId = PIXI.Text(this.remoteId, smallBitFont);
+          let textId = new PIXI.Text(this.remoteId, smallBitFont);
           textId.x = 30;
           textId.y = 30;
           this.backsideContainer.addChild(textId);
@@ -103,9 +105,9 @@ function init_tableservice() {
       this.container.addChild(this.backsideContainer);
 
       // event registration
-      this.backsideContainer.interactive = true;
-      this.backsideCointaner.on('pointerover', _showBack)
-        .on('pointerout', _hideBack);
+      this.container.interactive = true;
+      this.container.on('pointerover', _showBack.bind(this))
+        .on('pointerout', _hideBack.bind(this));
 
       this._internalVolume = 100;
     }
