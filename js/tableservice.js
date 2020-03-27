@@ -16,7 +16,6 @@ function init_tableservice() {
 
   const smallBitFont = new PIXI.TextStyle({
     fontFamily: ["Press Start 2P", "Courier New"],
-    fontStyle: "small-caps",
     fontSize: 11,
     wordWrap: true,
     wordWrapWidth: 2
@@ -89,8 +88,8 @@ function init_tableservice() {
       } else {
         if (this.remoteId) {
           let textId = new PIXI.Text(this.remoteId.replace(/-/g, "- "), smallBitFont);
-          textId.x = 40;
-          textId.y = 40;
+          textId.x = 120;
+          textId.y = 120;
           this.backsideContainer.addChild(textId);
         }
       }
@@ -136,7 +135,7 @@ function init_tableservice() {
 
     videoMute() {
       this._stream.getVideoTracks()[0].enabled = !this._stream.getVideoTracks()[0].enabled;
-      this.videoButton.texture = this._stream.getVideoTracks()[0].enabled ? VideoIcon : VideoMuteIcon;
+      this.videoMuteButton.texture = this._stream.getVideoTracks()[0].enabled ? VideoIcon : VideoMuteIcon;
     }
 
     set volume(val) {
