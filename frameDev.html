@@ -85,11 +85,13 @@
     <script>
         var meta = {{ meta }};
 
+        var table;
 
         $(function() {
             start_fabulation(meta)(meta["{{ root }}"]);
             try {
-              init_tableservice();
+              table = new Tableservice();
+              table.registerUI();
             } catch (err) {
               if (err.message.includes("WebGL unsupported")) {
                 $("#modalWarning").html("<p>Fehler: Dein Browser unterstützt kein WebGL. Leider ist die Telekneipe ohne WebGL zur Zeit nicht unterstützt.</p>");  
