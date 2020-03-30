@@ -1,4 +1,4 @@
-import {VideoFrame} from 'VideoFrame';
+import {VideoFrame} from './VideoFrame.js';
 
 export class VideoKitchen {
   constructor(logCB) {
