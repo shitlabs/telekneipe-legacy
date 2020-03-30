@@ -1,4 +1,4 @@
-import * from './VideoFrame.js';
+import {VideoFrame} from 'VideoFrame';
 
 export class VideoKitchen {
   constructor(logCB) {
@@ -38,7 +38,7 @@ export class VideoKitchen {
     } else {
       // setup Seriously effect chain for webcam video
       this._seriously = new Seriously({active:true});
-      var source = this._seriously.source(webcamvideo);
+      var source = this._seriously.source(this.webcamvideo);
       var target = this._seriously.target('#canvas');
       var effects_out = {
         //"brightness-contrast": {}, // TODO: limit colorlevels
@@ -55,7 +55,7 @@ export class VideoKitchen {
         target.height = 128;
       });
 
-      var reformat = seriously.transform('reformat');
+      var reformat = this._seriously.transform('reformat');
       reformat.source = source;
       reformat.width = 128;
       reformat.height = 128;
@@ -63,8 +63,8 @@ export class VideoKitchen {
 
       let in_source = reformat;
       // input postprocessing
-      Object.keys(effects_out).forEach(function (key, index) {
-        var effect = seriously.effect(key);
+      Object.keys(effects_out).forEach((key, index) => {
+        var effect = this._seriously.effect(key);
         var opts = effects_out[key];
 
         effect.source = in_source;
@@ -90,6 +90,8 @@ export class VideoKitchen {
       view: document.getElementById("screen")
     });
 
+    // allow touch
+    this.app.renderer.view.style.touchAction = "auto";
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -100,8 +102,7 @@ export class VideoKitchen {
     if (instance != undefined) {
       if (instance.slotIndex>=0) {
         this.allocated_slots[instance.slotIndex] = false;
-      }    
-      delete instance;
+      }          
     }
   }
 
@@ -183,8 +184,8 @@ export class VideoKitchen {
         // video effects are supported
         this._seriously.go();
         // mix streams for audio forwarding
-        localStream = $("#canvas").captureStream();
-        localStream.addTrack(stream.getAudioTracks()[0]);
+        this.localStream = document.getElementById("canvas").captureStream();
+        this.localStream.addTrack(stream.getAudioTracks()[0]);
       /*
       } else {
         // they are not, just capture webcam img. as fallback
@@ -192,11 +193,11 @@ export class VideoKitchen {
       }*/
 
       // create loopback video element and sprite
-      this.localFrame = new VideoFrame(localStream,true);
+      this.localFrame = new VideoFrame(this.localStream,true);
       this.localFrame.videoElement.muted = true;
   
       //sprite to canvas
-      this.localFrame.container.y = app.renderer.height-235;
+      this.localFrame.container.y = this.app.renderer.height-235;
       this.localFrame.container.x = 0;
 
 
@@ -205,7 +206,7 @@ export class VideoKitchen {
 
 
       $("#step1").hide();
-    }.bind(this))
+    })
     .catch(error => {
         console.error("Error accessing media devices.", error);
         $("#step1-error").show();
@@ -213,7 +214,7 @@ export class VideoKitchen {
 
   }
 
-  closeCall() {
+  closeCalls() {
 	  // end call
       for (let [key, value] of this.existingCalls) {
         this.cleanUpAvatar(key,value);

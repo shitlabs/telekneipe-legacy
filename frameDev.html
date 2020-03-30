@@ -18,7 +18,7 @@
     <script type="text/javascript" src="https://brianchirls.github.io/Seriously.js/effects/seriously.hue-saturation.js"></script>
     <script type="text/javascript" src="https://pixijs.download/release/pixi.min.js"></script>
     <script type="text/javascript" src="js/fabulation.js"></script>
-    <script type="text/javascript" src="js/tableservice.js"></script>
+    
   </head>
 
   <body>
@@ -82,10 +82,13 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
+        import {Tableservice} from "./js/tableservice.js";
+        
         var meta = {{ meta }};
 
         var table;
+
 
         $(function() {
             start_fabulation(meta)(meta["{{ root }}"]);

@@ -1,6 +1,6 @@
 import VideoKitchen from './avclub.js';
 
-class Tableservice {
+export class Tableservice {
   constructor() {
     this.avclub = new VideoKitchen(this.logToReceipt);
     // PeerJS object
@@ -18,7 +18,7 @@ class Tableservice {
 
     // Connection established, update UI
     this.peer.on('open', () => {
-      $('#receiptId').text(peer.id);
+      $('#receiptId').text(this.peer.id);
     });
 
     // Receive connection request
