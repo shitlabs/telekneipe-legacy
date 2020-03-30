@@ -1,4 +1,4 @@
-import VideoKitchen from './avclub.js';
+import {VideoKitchen} from './avclub.js';
 
 export class Tableservice {
   constructor() {
