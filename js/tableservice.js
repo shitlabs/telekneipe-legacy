@@ -36,12 +36,12 @@ export class Tableservice {
     // Receiving a call
     this.peer.on('call', (call) => {
       // Answer the call automatically (instead of prompting user) for demo purposes
-      if (this.localStream == null) {
+      if (this.avclub.localStream == null) {
         // do some emergency display action
         // TODO
         console.error("Received call before initialization of webcam or our webcam stopped")
       }
-      call.answer(this.localStream);
+      call.answer(this.aclub.localStream);
 
       this.avclub.processCall(call);
 
