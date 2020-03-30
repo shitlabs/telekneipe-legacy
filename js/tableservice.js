@@ -41,7 +41,7 @@ export class Tableservice {
         // TODO
         console.error("Received call before initialization of webcam or our webcam stopped")
       }
-      call.answer(this.aclub.localStream);
+      call.answer(this.avclub.localStream);
 
       this.avclub.processCall(call);
 
