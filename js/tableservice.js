@@ -27,8 +27,8 @@ export class Tableservice {
       conn.on('open', () => {
         this.logToReceipt(`${conn.peer} comes to the table.`)
         console.log("Sending connected_peers");
-        console.log(connected_peers);
-        conn.send(connected_peers);
+        console.log(this.connected_peers);
+        conn.send(this.connected_peers);
       });
       
     });
