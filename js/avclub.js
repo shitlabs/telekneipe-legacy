@@ -1,5 +1,8 @@
 import {VideoFrame} from './VideoFrame.js';
 
+const positions = [{x:0, y:0},{x:266, y:0},{x:266*2, y:0},{x:0, y:266},{x:266, y:266},{x:266*2, y:266}];
+
+
 export class VideoKitchen {
   constructor(logCB) {
   	this.log = logCB;
@@ -7,8 +10,6 @@ export class VideoKitchen {
     this.localStream = null;
     this.existingCalls = new Map();
 
-    var positions = [{x:0, y:0},{x:266, y:0},{x:266*2, y:0},
-            {x:0, y:266},{x:266, y:266},{x:266*2, y:266}];
     this.allocated_slots = new Array(positions.length);
     this.allocated_slots.fill(false);
 
