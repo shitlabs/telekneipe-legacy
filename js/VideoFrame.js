@@ -63,6 +63,7 @@ export class VideoFrame {
       this.frame = new PIXI.Sprite(this._frames.FrameTexture);
       this.frame.x = this._frames.offsetFrame.x;
       this.frame.y = this._frames.offsetFrame.y;
+      this.frame.zIndex = 10;
 
 
       
@@ -108,7 +109,8 @@ export class VideoFrame {
 
 
       this.backsideContainer.visible = false;
-
+      this.backsideContainer.zIndex = 30;
+      
       this.container.addChild(this.frame);
 
       this.container.addChild(this.backsideContainer);
@@ -127,6 +129,7 @@ export class VideoFrame {
     this.videoSprite.height = 182;
     this.videoSprite.x =  this._frames.offsetVideo.x;
     this.videoSprite.y = this._frames.offsetVideo.y;
+    this.videoSprite.zIndex = 20;
 
     if (this.selfie) this.videoSprite.texture.rotate = 12;
     if (this._frames.videoTint) this.videoSprite.tint = this._frames.videoTint;    
