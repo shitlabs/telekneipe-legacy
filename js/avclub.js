@@ -44,7 +44,7 @@ export class DefaultTable extends BaseTable {
         {
             this.onFrameChange(this.currentFrame);
         }
-    };
+    }.bind(background);
 
   	return background;
   }
@@ -151,7 +151,7 @@ export class VideoKitchen {
     // allow touch
     this.app.renderer.view.style.touchAction = "auto";
     this.app.renderer.view.style.margin = "auto";
-    this.app.renderer.view.style.dispaly = "block";
+    this.app.renderer.view.style.display = "block";
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
