@@ -115,7 +115,9 @@ export class VideoFrame {
 
       this.container.addChild(this.backsideContainer);
 
+
       this.container.sortChildren();
+
 
       // event registration
       this.container.interactive = true;
@@ -137,6 +139,7 @@ export class VideoFrame {
     if (this._frames.videoTint) this.videoSprite.tint = this._frames.videoTint;    
 
     this.container.addChild(this.videoSprite);
+    this.container.sortChildren();
 
 
     this._internalVolume = 100;
