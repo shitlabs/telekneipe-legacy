@@ -116,7 +116,8 @@ h3 {
     position: fixed;
     bottom:0px;
     max-width: 512px;    
-    margin: auto;
+    left:50%;
+    transform: translateX(-50%);
     display:none;
     z-index: 1;
 }

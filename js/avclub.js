@@ -4,7 +4,7 @@ import {VideoFrame,DefaultFrame} from './VideoFrame.js';
 
 export function preLoadSprites() {
   DefaultFrame.preload();
-  let table = new BaseTable("sprites/basic.json",(){});
+  let table = new BaseTable("sprites/basic.json",()=>{});
 }
 
 export class BaseTable {
@@ -24,7 +24,7 @@ export class BaseTable {
 // one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
 export class DefaultTable extends BaseTable {
   constructor(onLoad) {
-    super("sprites/basicTables.json",onLoad);
+    super("sprites/basicTable.json",onLoad);
   }
   getBackgroundSprite() {
   	let background = new PIXI.AnimatedSprite(this.animations["frame"]);

@@ -65,9 +65,8 @@ export class VideoFrame {
       this.frame.y = this._frames.offsetFrame.y;
 
 
-      if (this._frames.videoTint) videoSprite.tint = this._frames.videoTint;
+      
 
-      if (this.selfie) videoSprite.texture.rotate = 12;
 
       this.backsideContainer = new PIXI.Container();
 
@@ -128,6 +127,10 @@ export class VideoFrame {
     this.videoSprite.height = 182;
     this.videoSprite.x =  this._frames.offsetVideo.x;
     this.videoSprite.y = this._frames.offsetVideo.y;
+
+    if (this.selfie) this.videoSprite.texture.rotate = 12;
+    if (this._frames.videoTint) this.videoSprite.tint = this._frames.videoTint;    
+
     this.container.addChild(this.videoSprite);
 
 
