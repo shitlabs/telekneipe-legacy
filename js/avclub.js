@@ -29,9 +29,23 @@ export class DefaultTable extends BaseTable {
   getBackgroundSprite() {
   	let background = new PIXI.AnimatedSprite(this.animations["frame"]);
   	// overrite currentFrame to return a random frame
-  	Object.defineProperty(background, 'currentFrame', {get: () => {
-  		return Math.floor(Math.random()* background.totalFrames);
-  	}});
+  	background.updateTexture()
+    {
+        this._texture = this._textures[Math.floor(Math.random()* this._textures.length)];
+        this._textureID = -1;
+        this._textureTrimmedID = -1;
+        this._cachedTint = 0xFFFFFF;
+        this.uvs = this._texture._uvs.uvsFloat32;
+        if (this.updateAnchor)
+        {
+            this._anchor.copyFrom(this._texture.defaultAnchor);
+        }
+        if (this.onFrameChange)
+        {
+            this.onFrameChange(this.currentFrame);
+        }
+    };
+
   	return background;
   }
 }
@@ -136,15 +150,19 @@ export class VideoKitchen {
 
     // allow touch
     this.app.renderer.view.style.touchAction = "auto";
+    this.app.renderer.view.style.margin = "auto";
+    this.app.renderer.view.style.dispaly = "block";
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     this.table = new DefaultTable(() => {
 	    this.backgroundSprite = this.table.getBackgroundSprite();
-	    this.backgroundSprite.width = this.app.stage.width;
-	    this.backgroundSprite.height = this.app.stage.height;
-
+	    this.backgroundSprite.width = size.x;
+	    this.backgroundSprite.height = size.y;
+	    this.backgroundSprite.x = 0;
+	    this.backgroundSprite.y = 0;
 	    this.app.stage.addChild(this.backgroundSprite);
+	    this.backgroundSprit.play();
     });
 
 
