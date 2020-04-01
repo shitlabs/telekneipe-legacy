@@ -110,10 +110,12 @@ export class VideoFrame {
 
       this.backsideContainer.visible = false;
       this.backsideContainer.zIndex = 30;
-      
+
       this.container.addChild(this.frame);
 
       this.container.addChild(this.backsideContainer);
+
+      this.container.sortChildren();
 
       // event registration
       this.container.interactive = true;
