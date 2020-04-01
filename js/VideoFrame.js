@@ -71,7 +71,7 @@ export class VideoFrame {
 
       this.backsideContainer = new PIXI.Container();
 
-      this.overlaySprite = new PIXI.Sprite(this._frames.FrameTexture_Filled);
+      this.overlaySprite = new PIXI.Sprite(this._frames.FrameTexture_filled);
       this.overlaySprite.x = this._frames.offsetFrame.x;
       this.overlaySprite.y = this._frames.offsetFrame.y;
 
