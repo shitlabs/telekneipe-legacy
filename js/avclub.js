@@ -29,7 +29,7 @@ export class DefaultTable extends BaseTable {
   getBackgroundSprite() {
   	let background = new PIXI.AnimatedSprite(this.animations["frame"]);
   	// overrite currentFrame to return a random frame
-  	background.updateTexture()
+  	background.updateTexture = function()
     {
         this._texture = this._textures[Math.floor(Math.random()* this._textures.length)];
         this._textureID = -1;
@@ -161,8 +161,9 @@ export class VideoKitchen {
 	    this.backgroundSprite.height = size.y;
 	    this.backgroundSprite.x = 0;
 	    this.backgroundSprite.y = 0;
+	    this.backgroundSprite.animationSpeed = 0.1;
 	    this.app.stage.addChild(this.backgroundSprite);
-	    this.backgroundSprit.play();
+	    this.backgroundSprite.play();
     });
 
 
