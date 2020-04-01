@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1, width=device-width, height=device-height">
     <meta name="description" content="The only thing we know about cyberspace is that is serves Sterni">
     <meta name="author" content="shitcrew">
 
@@ -35,11 +35,8 @@
         </div>
       </div>
     </div>
-
-    <div class="bg">
-    </div>
-    <div class="content" id="catch_events">
-      <!-- TELEKNEIPE Modals -->
+    <!-- TELEKNEIPE Modals -->    
+    <div class="telekneipe_container">
       <div id="step1">
           <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for transmission.</p>
           <div id="step1-error">
@@ -55,11 +52,16 @@
         </div>
       </div>
       <div id="table_container">     
-        <div class="pure-u-2-3" id="video-container">
+        <div id="video-container">
           <canvas id="screen"></canvas>
-          <canvas id="canvas"></canvas>
         </div>
       </div>
+    </div>
+
+    <div class="bg">
+    </div>
+    <div class="content" id="catch_events">
+
 
       <!-- FABULATION -->
         <div class="disp">

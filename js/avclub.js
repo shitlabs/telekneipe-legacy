@@ -1,4 +1,39 @@
-import {VideoFrame} from './VideoFrame.js';
+import {VideoFrame,DefaultFrame} from './VideoFrame.js';
+
+
+
+export function preLoadSprites {
+  DefaultFrame.preload();
+  let table = new BaseTable("sprites/basic.json");
+}
+
+export class BaseTable {
+  constructor(spriteSheet) {
+    let loader = PIXI.Loader.shared;
+    this.textures = {}
+    this.resources = {}
+    loader.add(spriteSheet);
+    loader.load((loader,resources) => {      
+      this.textures = resources[spriteSheet].spritesheet.textures;
+      this.animations  = resources[spriteSheet].spritesheet.animations;
+    });
+  }
+}
+
+// one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
+export class DefaultTable extends BaseTable {
+  constructor() {
+    super("sprites/basicTables.json");
+  }
+  getBackgroundSprite() {
+  	let background = new PIXI.AnimatedSprite(this.animations["frames"]);
+  	// overrite currentFrame to return a random frame
+  	Object.defineProperty(background, 'currentFrame', {get: () => {
+  		return Math.floor(Math.random()* background.totalFrames);
+  	}});
+  	return background;
+  }
+}
 
 const positions = [{x:0, y:0},{x:266, y:0},{x:266*2, y:0},{x:0, y:266},{x:266, y:266},{x:266*2, y:266}];
 
@@ -22,6 +57,12 @@ export class VideoKitchen {
     this.webcamvideo.autplay = true;
     this.webcamvideo.playsinline = true;
 
+
+    // create canvas to draw webcam to
+    this.webcamcanvas = document.createElement("canvas");
+    this.webcamcanvas.style.width = "128px";
+    this.webcamcanvas.style.height = "128px";
+
   	// check if support is here
     var msg = '', seriouslyFail = Seriously.incompatible();
     if (seriouslyFail) {
@@ -40,7 +81,7 @@ export class VideoKitchen {
       // setup Seriously effect chain for webcam video
       this._seriously = new Seriously({active:true});
       var source = this._seriously.source(this.webcamvideo);
-      var target = this._seriously.target('#canvas');
+      var target = this._seriously.target(this.webcamcanvas);
       var effects_out = {
         //"brightness-contrast": {}, // TODO: limit colorlevels
         pixelate: {
@@ -83,11 +124,12 @@ export class VideoKitchen {
       target.source = in_source;
     }
 
+    let size = VideoKitchen.calcGeometry();
 
     //create a Pixi Application
     this.app = new PIXI.Application({
-      width: 800,         // default: 400
-      height: 600,        // default: 400
+      width: size.x,         // default: 400
+      height: size.y,        // default: 400
       view: document.getElementById("screen")
     });
 
@@ -95,6 +137,15 @@ export class VideoKitchen {
     this.app.renderer.view.style.touchAction = "auto";
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+    this.table = DefaultTable();
+
+    this.backgroundSprite = this.table.getBackgroundSprite();
+
+    this.backgroundSprite.width = this.app.stage.width;
+    this.backgroundSpite.height = this.app.stage.height;
+
+    this.app.stage.addChild(this.backgroundSpite);
 
   }
 
@@ -185,7 +236,7 @@ export class VideoKitchen {
         // video effects are supported
         this._seriously.go();
         // mix streams for audio forwarding
-        this.localStream = document.getElementById("canvas").captureStream();
+        this.localStream = this.webcamcanvas.captureStream();
         this.localStream.addTrack(stream.getAudioTracks()[0]);
       /*
       } else {
@@ -224,6 +275,19 @@ export class VideoKitchen {
         // remove element
         this.existingCalls.delete(key);
       }
+  }
+
+
+  static calcGeometry() {
+  	let width = window.innerWidth;
+  	let height = window.innerHeight-8;
+
+  	if (width/height>=16/9) {
+  		width = height*16/9;
+  	} else {
+  		height = width*9/16;
+  	}
+  	return {x: width, y:height};
   }
 
 }
