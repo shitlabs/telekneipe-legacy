@@ -2,13 +2,13 @@ import {VideoFrame,DefaultFrame} from './VideoFrame.js';
 
 
 
-export function preLoadSprites {
+export function preLoadSprites() {
   DefaultFrame.preload();
-  let table = new BaseTable("sprites/basic.json");
+  let table = new BaseTable("sprites/basic.json",(){});
 }
 
 export class BaseTable {
-  constructor(spriteSheet) {
+  constructor(spriteSheet,onLoad) {
     let loader = PIXI.Loader.shared;
     this.textures = {}
     this.resources = {}
@@ -16,17 +16,18 @@ export class BaseTable {
     loader.load((loader,resources) => {      
       this.textures = resources[spriteSheet].spritesheet.textures;
       this.animations  = resources[spriteSheet].spritesheet.animations;
-    });
+      onLoad();
+    });    
   }
 }
 
 // one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
 export class DefaultTable extends BaseTable {
-  constructor() {
-    super("sprites/basicTables.json");
+  constructor(onLoad) {
+    super("sprites/basicTables.json",onLoad);
   }
   getBackgroundSprite() {
-  	let background = new PIXI.AnimatedSprite(this.animations["frames"]);
+  	let background = new PIXI.AnimatedSprite(this.animations["frame"]);
   	// overrite currentFrame to return a random frame
   	Object.defineProperty(background, 'currentFrame', {get: () => {
   		return Math.floor(Math.random()* background.totalFrames);
@@ -138,14 +139,15 @@ export class VideoKitchen {
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-    this.table = DefaultTable();
+    this.table = new DefaultTable(() => {
+	    this.backgroundSprite = this.table.getBackgroundSprite();
+	    this.backgroundSprite.width = this.app.stage.width;
+	    this.backgroundSprite.height = this.app.stage.height;
 
-    this.backgroundSprite = this.table.getBackgroundSprite();
+	    this.app.stage.addChild(this.backgroundSprite);
+    });
 
-    this.backgroundSprite.width = this.app.stage.width;
-    this.backgroundSpite.height = this.app.stage.height;
 
-    this.app.stage.addChild(this.backgroundSpite);
 
   }
 

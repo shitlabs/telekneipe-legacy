@@ -9,19 +9,20 @@ export  const smallBitFont = new PIXI.TextStyle({
 
 // one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
 export class DefaultFrame {
-  constructor() {
+  constructor(onLoad) {
     let loader = PIXI.Loader.shared;
     this.textures = {};
     loader.add("sprites/basicFrame.json");
     loader.load((loader,resources) => {
       this.textures = resources["sprites/basicFrame.json"].spritesheet.textures;
+      this.FrameTexture = this.textures["image_frame.png"];
+      this.FrameTexture_filled = this.textures["image_frame_filled.png"];
+      this.FrameVolIcon = this.textures["volume.png"];
+      this.FrameMuteIcon = this.textures["volume_mute.png"];
+      this.VideoIcon = this.textures["video.png"];
+      this.VideoMuteIcon = this.textures["video_mute.png"];
+      onLoad();
     });
-    this.FrameTexture = this.textures["image_frame.png"];
-    this.FrameTexture_filled = this.textures["image_frame_filled.png"];
-    this.FrameVolIcon = this.textures["volume.png"];
-    this.FrameMuteIcon = this.textures["volume_mute.png"];
-    this.VideoIcon = this.textures["video.png"];
-    this.VideoMuteIcon = this.textures["video_mute.png"];
 
     this.offsetVideo = {x: 27, y: 27};
     this.offsetFrame = {x: 0, y:0}
@@ -47,80 +48,88 @@ export class VideoFrame {
     this.selfie = selfie;
 
     this._stream = stream;
-    this._frames = new DefaultFrame();
+
     //webcam to sprite
     this.videoElement = document.createElement("video");         
     this.videoElement.autoplay = true;
     this.videoElement.playsinline = true;
     this.videoElement.srcObject = this._stream;
     this.videoElement.play();
+   
+    this.container = new PIXI.Container()
+
+    this._frames = new DefaultFrame(() => {
+
+      this.frame = new PIXI.Sprite(this._frames.FrameTexture);
+      this.frame.x = this._frames.offsetFrame.x;
+      this.frame.y = this._frames.offsetFrame.y;
 
 
-    this.frame = new PIXI.Sprite(this._frames.FrameTexture);
-    this.frame.x = this._frames.offsetFrame.x;
-    this.frame.y = this._frames.offsetFrame.y;
+      if (this._frames.videoTint) videoSprite.tint = this._frames.videoTint;
+
+      if (this.selfie) videoSprite.texture.rotate = 12;
+
+      this.backsideContainer = new PIXI.Container();
+
+      this.overlaySprite = new PIXI.Sprite(this._frames.FrameTexture_Filled);
+      this.overlaySprite.x = this._frames.offsetFrame.x;
+      this.overlaySprite.y = this._frames.offsetFrame.y;
+
+      this.backsideContainer.addChild(this.overlaySprite);
+
+      this.muteButton = new PIXI.Sprite(this._frames.FrameVolIcon);
+      this.muteButton.interactive = true;
+      this.muteButton.buttonMode = true;
+      this.muteButton.x = this._frames.offsetMute.x;
+      this.muteButton.y = this._frames.offsetMute.y;
+      this.muteButton.on("pointerdown",this.toggleMute.bind(this));
+
+
+      if (this.selfie) {
+        this.videoMuteButton = new PIXI.Sprite(this._frames.VideoIcon);
+        this.videoMuteButton.interactive = true;
+        this.videoMuteButton.buttonMode = true;
+        this.videoMuteButton.x = this._frames.offsetVideoMute.x;
+        this.videoMuteButton.y = this._frames.offsetVideoMute.y;
+        this.videoMuteButton.on("pointerdown",this.videoMute.bind(this));
+
+        this.backsideContainer.addChild(this.videoMuteButton);
+
+      } else {
+        if (this.remoteId) {
+          this.textId = new PIXI.Text(this.remoteId.replace(/-/g, "- "), smallBitFont);
+          this.textId.x = this._frames.offsetIdText.x;
+          this.textId.y = this._frames.offsetIdText.y;
+          this.backsideContainer.addChild(this.textId);
+        }
+      }
+
+
+      this.backsideContainer.addChild(this.muteButton); // add late to keep in front.
+
+
+      this.backsideContainer.visible = false;
+
+      this.container.addChild(this.frame);
+
+      this.container.addChild(this.backsideContainer);
+
+      // event registration
+      this.container.interactive = true;
+      this.container.on('pointerover', this._showBack.bind(this))
+        .on('pointerout', this._hideBack.bind(this));
+
+
+    });
 
     //let texture = PIXI.Texture.from();
-    this.videoSprite = PIXI.Sprite.from(this._frames.videoElement);
+    this.videoSprite = PIXI.Sprite.from(this.videoElement);
     this.videoSprite.width = 182;
     this.videoSprite.height = 182;
     this.videoSprite.x =  this._frames.offsetVideo.x;
     this.videoSprite.y = this._frames.offsetVideo.y;
-
-    if (this._frames.videoTint) videoSprite.tint = this._frames.videoTint;
-
-    if (this.selfie) videoSprite.texture.rotate = 12;
-
-    this.backsideContainer = new PIXI.Container();
-
-    this.overlaySprite = new PIXI.Sprite(this._frames.FrameTexture_Filled);
-    this.overlaySprite.x = this._frames.offsetFrame.x;
-    this.overlaySprite.y = this._frames.offsetFrame.y;
-
-    this.backsideContainer.addChild(this.overlaySprite);
-
-    this.muteButton = new PIXI.Sprite(this._frames.FrameVolIcon);
-    this.muteButton.interactive = true;
-    this.muteButton.buttonMode = true;
-    this.muteButton.x = this._frames.offsetMute.x;
-    this.muteButton.y = this._frames.offsetMute.y;
-    this.muteButton.on("pointerdown",this.toggleMute.bind(this));
-
-
-    if (this.selfie) {
-      this.videoMuteButton = new PIXI.Sprite(this._frames.VideoIcon);
-      this.videoMuteButton.interactive = true;
-      this.videoMuteButton.buttonMode = true;
-      this.videoMuteButton.x = this._frames.offsetVideoMute.x;
-      this.videoMuteButton.y = this._frames.offsetVideoMute.y;
-      this.videoMuteButton.on("pointerdown",this.videoMute.bind(this));
-
-      this.backsideContainer.addChild(this.videoMuteButton);
-
-    } else {
-      if (this.remoteId) {
-        this.textId = new PIXI.Text(this.remoteId.replace(/-/g, "- "), smallBitFont);
-        this.textId.x = this._frames.offsetIdText.x;
-        this.textId.y = this._frames.offsetIdText.y;
-        this.backsideContainer.addChild(this.textId);
-      }
-    }
-
-
-    this.backsideContainer.addChild(this.muteButton); // add late to keep in front.
-
-
-    this.backsideContainer.visible = false;
-    
-    this.container = new PIXI.Container()
-    this.container.addChild(this.frame);
     this.container.addChild(this.videoSprite);
-    this.container.addChild(this.backsideContainer);
 
-    // event registration
-    this.container.interactive = true;
-    this.container.on('pointerover', this._showBack.bind(this))
-      .on('pointerout', this._hideBack.bind(this));
 
     this._internalVolume = 100;
   }
