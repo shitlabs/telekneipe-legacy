@@ -54,7 +54,7 @@ export class Tableservice {
       });
       call.on("close", () => {
         let index = this.connected_peers.findIndex((element) => (element == call.peer));
-        if (index>0) this.connected_peers.slice(index,1);
+        if (index>=0) this.connected_peers.slice(index,1);
       });
 
     });
