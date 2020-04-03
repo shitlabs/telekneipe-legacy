@@ -164,7 +164,7 @@ export class VideoKitchen {
     this.app.renderer.view.style.margin = "auto";
     this.app.renderer.view.style.display = "block";
     // on rescale
-    window.addEventListener('resize', this.rescale);
+    window.addEventListener('resize', this.rescale.bind(this));
 
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -352,7 +352,7 @@ export class VideoKitchen {
         this.cleanUpAvatar(call.peer,this.existingCalls.get(call.peer));
         this.existingCalls.delete(call.peer);
       }
-
+  
 
       
       //let remotevideo,container;

@@ -23,7 +23,7 @@ export class DefaultFrame {
     this.textures = {};
     if (loader.resources["sprites/basicFrame.json"]) {
       //FIXME: Bad code duplication.
-      this.textures = resources["sprites/basicFrame.json"].spritesheet.textures;
+      this.textures = loader.resources["sprites/basicFrame.json"].spritesheet.textures;
       this.FrameTexture = this.textures["image_frame.png"];
       this.FrameTexture_filled = this.textures["image_frame_filled.png"];
       this.FrameVolIcon = this.textures["volume.png"];
@@ -31,7 +31,7 @@ export class DefaultFrame {
       this.VideoIcon = this.textures["video.png"];
       this.VideoMuteIcon = this.textures["video_mute.png"];
 
-      onLoad()
+      window.setTimeout(onLoad()); // must be callback
     } else {
       loader.add("sprites/basicFrame.json");
       loader.load((loader,resources) => {
