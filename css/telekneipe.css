@@ -11,6 +11,7 @@ h3 {
     border-top:8px solid #000;
     width:50%;
     /*height:45%;*/
+    margin:auto;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
