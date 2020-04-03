@@ -6,58 +6,8 @@ export  const smallBitFont = new PIXI.TextStyle({
     wordWrapWidth: 2
   });
 
-
-// one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
-export class DefaultFrame {
-  constructor(onLoad) {
-    let loader = PIXI.Loader.shared;
-    this.offsetVideo = {x: 27, y: 27};
-    this.offsetFrame = {x: 0, y:0}
-    this.offsetMute = {x: 170, y:45};
-    this.offsetVideoMute = {x:45, y:45};
-    this.offsetIdText = {x:120,y:120};
-
-    this.videoTint = 0xe0b888;
-
-
-    this.textures = {};
-    if (loader.resources["sprites/basicFrame.json"]) {
-      //FIXME: Bad code duplication.
-      this.textures = loader.resources["sprites/basicFrame.json"].spritesheet.textures;
-      this.FrameTexture = this.textures["image_frame.png"];
-      this.FrameTexture_filled = this.textures["image_frame_filled.png"];
-      this.FrameVolIcon = this.textures["volume.png"];
-      this.FrameMuteIcon = this.textures["volume_mute.png"];
-      this.VideoIcon = this.textures["video.png"];
-      this.VideoMuteIcon = this.textures["video_mute.png"];
-
-      window.setTimeout(onLoad()); // must be callback
-    } else {
-      loader.add("sprites/basicFrame.json");
-      loader.load((loader,resources) => {
-        this.textures = resources["sprites/basicFrame.json"].spritesheet.textures;
-        this.FrameTexture = this.textures["image_frame.png"];
-        this.FrameTexture_filled = this.textures["image_frame_filled.png"];
-        this.FrameVolIcon = this.textures["volume.png"];
-        this.FrameMuteIcon = this.textures["volume_mute.png"];
-        this.VideoIcon = this.textures["video.png"];
-        this.VideoMuteIcon = this.textures["video_mute.png"];
-        onLoad();
-      });
-    }
-  }
-
-
-  static preLoad() {
-    let loader = PIXI.Loader.shared;
-    loader.add("sprites/basicFrame.json");
-    loader.load();
-  }
-}
-
-
 export class MinimalFrame {
-  constructor(onLoad) {
+  constructor() {
     this.FrameTexture = undefined;
     this.FrameTexture_filled = undefined;
     this.FrameVolIcon = undefined;
@@ -73,13 +23,64 @@ export class MinimalFrame {
 
     this.videoTint = 0xe0b888;
 
-    onLoad();
 
   }
 
   static preLoad() {    
   }
 }
+
+
+// one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
+export class DefaultFrame extends MinimalFrame {
+  constructor() {
+    super();
+    this._spriteSheet = "sprites/basicFrame.json";
+    this.loaded = false;
+    let loader = PIXI.Loader.shared;
+    this.offsetVideo = {x: 27, y: 27};
+    this.offsetFrame = {x: 0, y:0}
+    this.offsetMute = {x: 170, y:45};
+    this.offsetVideoMute = {x:45, y:45};
+    this.offsetIdText = {x:120,y:120};
+
+    this.videoTint = 0xe0b888;
+  }
+
+  loadTextures(callback) {    
+    if (loader.resources[this._spriteSheet]) {
+      //FIXME: Bad code duplication.
+      this.textures = loader.resources["sprites/basicFrame.json"].spritesheet.textures;
+      this.FrameTexture = this.textures["image_frame.png"];
+      this.FrameTexture_filled = this.textures["image_frame_filled.png"];
+      this.FrameVolIcon = this.textures["volume.png"];
+      this.FrameMuteIcon = this.textures["volume_mute.png"];
+      this.VideoIcon = this.textures["video.png"];
+      this.VideoMuteIcon = this.textures["video_mute.png"];
+      callback();
+    } else {
+      loader.add("sprites/basicFrame.json");
+      loader.load((loader,resources) => {
+        this.textures = resources["sprites/basicFrame.json"].spritesheet.textures;
+        this.FrameTexture = this.textures["image_frame.png"];
+        this.FrameTexture_filled = this.textures["image_frame_filled.png"];
+        this.FrameVolIcon = this.textures["volume.png"];
+        this.FrameMuteIcon = this.textures["volume_mute.png"];
+        this.VideoIcon = this.textures["video.png"];
+        this.VideoMuteIcon = this.textures["video_mute.png"];
+        callback();
+      });
+    }
+  }
+
+
+  static preLoad() {
+    let loader = PIXI.Loader.shared;
+    loader.add("sprites/basicFrame.json");
+    loader.load();
+  }
+}
+
 
 
 export class VideoFrame {
@@ -98,9 +99,10 @@ export class VideoFrame {
     this.videoElement.srcObject = this._stream;
     this.videoElement.play();
    
-    this.container = new PIXI.Container()
+    this.container = new PIXI.Container();
 
-    this._frames = new DefaultFrame(() => {
+    this._frames = new DefaultFrame();
+    this._frames.loadTextures(() => {
 
       this.frame = new PIXI.Sprite(this._frames.FrameTexture);
       this.frame.x = this._frames.offsetFrame.x;
