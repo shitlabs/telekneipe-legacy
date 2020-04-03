@@ -252,10 +252,10 @@ export class VideoKitchen {
 
     let framescale = 1;
     // check if we should scale up frames, max remotes 2        
-    if ((rows >= (this.existingCalls.size+1)*2) || (cols >= (this.existingCalls.size+1)*2)) {
+    if ((rows >= (this.existingCalls.size+1)*2) && (cols >= (this.existingCalls.size+1)*2)) {
             // yes, scale twice
             framescale = 2;
-    } else if ((rows >= (this.existingCalls.size+1)*1.5) || (cols >= (this.existingCalls.size+1)*1.5)) {
+    } else if ((rows >= (this.existingCalls.size+1)*1.5) && (cols >= (this.existingCalls.size+1)*1.5)) {
             // yes, scale 1.5
             framescale = 1.5;
     }
@@ -449,6 +449,27 @@ export class VideoKitchen {
       this.rescale();
   }
 
+  debugAddFrame(id) {      
+    //let remotevideo,container;
+    let newFrame = new VideoFrame(null,false,id);
+    newFrame.remoteId = id;
+
+    
+
+    newFrame.container.x = 0;
+    newFrame.container.y = 0;
+
+
+    this.app.stage.addChild(newFrame.container);
+    
+
+
+    // insert entry into existingCalls
+    this.existingCalls.set(id,newFrame);
+
+    // update placement
+    this.rescale();
+  }
 
   static calcGeometry() {
     let width = window.innerWidth;

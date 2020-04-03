@@ -124,6 +124,7 @@ h3 {
 
 .receipt-top {
     height: 8px;
+    width:100%;
     padding: 0px 8px;
     background-image: url("./../pics/sawtooth_top.png");
     background-repeat: repeat-x;
