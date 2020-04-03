@@ -11,6 +11,7 @@ h3 {
     border-top:8px solid #000;
     width:50%;
     /*height:45%;*/
+    margin:auto;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -21,29 +22,14 @@ h3 {
 
 #table_container
 {
-    border-top:8px solid #000;
-    width:75%;
-    /*height:45%;*/
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    text-align: center;
+    position: relative;    
+    border-bottom:8px solid #000;
+    width:100%;
+    height:100%;
+    margin: auto;
     display: none;
 }
 
-#video-container {
-  padding: 25px;
-  text-align: center;
-}
-
-
-#canvas {
-  margin-top: 15px;
-  width: 280px;
-  height: auto;
-  background-color: #eee;
-  display: none;
-}
 
 #step1-error, #step1 {
   display: none;
@@ -57,7 +43,7 @@ h3 {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 2; /* Sit on top */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
@@ -88,26 +74,31 @@ h3 {
 } 
 
 /* Modal Header */
-.modal-header {
+.modal-content-header {
   padding: 2px 16px;
-  background-color: #111;
+  background-color: #333;
   color: white;
 }
 
-
+.modal-content-body {
+  padding: 2px 16px 16px;
+}
 /* Modal Content */
 .modal-content {
   position: relative;
+  padding:0;
+  height:auto;
   top: 45%;
   background-color: #000000;
   margin: auto;
-  padding: 2px 16px 16px;
   border: 1px solid #888;
   width: 40%;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(.3,.3,.3,.19);
   animation-name: animatetop;
   animation-duration: 0.4s
+  
 }
+
 
 /* Add Animation */
 @keyframes animatetop {
@@ -119,4 +110,55 @@ h3 {
     padding: 4px;
     color: #f11;
     font-weight: bold;
+}
+
+
+.receipt {
+    position: fixed;
+    bottom:0px;
+    max-width: 512px;    
+    left:50%;
+    transform: translateX(-50%);
+    display:none;
+    z-index: 1;
+}
+
+.receipt-top {
+    height: 8px;
+    width:100%;
+    padding: 0px 8px;
+    background-image: url("./../pics/sawtooth_top.png");
+    background-repeat: repeat-x;
+    background-size: 8px 8px;
+    image-rendering: pixelated;
+}
+.receipt-header {
+    position: relative;
+    display:block;
+    padding: 8px;
+    width: 100%;
+    font-size: 10pt;
+    font-family: "Press Start 2P", "Courier New", Courier, monospace;
+    background-color: #fff1e1;
+    color:#000;
+    border-bottom: 2px solid #666;
+    text-align: center;
+}
+
+.receipt #console {    
+    padding: 8px;
+    font-size: 10pt;
+    font-family: "Press Start 2P", "Courier New", Courier, monospace;
+    background-color: #fff1e1;
+    color:#000;
+    border-bottom: 2px solid #666;
+    display:none;
+    width:100%;
+
+}
+.receipt-close {
+    float: right;
+    height: 10px;
+    image-rendering: pixelated;
+    display:none;
 }

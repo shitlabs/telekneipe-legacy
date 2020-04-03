@@ -18,7 +18,7 @@
     <script type="text/javascript" src="https://brianchirls.github.io/Seriously.js/effects/seriously.hue-saturation.js"></script>
     <script type="text/javascript" src="https://pixijs.download/release/pixi.min.js"></script>
     <script type="text/javascript" src="js/fabulation.js"></script>
-
+    
   </head>
 
   <body>
@@ -27,10 +27,10 @@
       <div class="modal-content">
         <div class="modal-content-header">
           <span class="close" id="betaWarningButton">&times;</span>
-          <h3>Early Access</h3>
+          <h3>Experimental Branch</h3>
         </div>
         <div class="modal-content-body">
-          Die Telekneipe ist noch unter Entwicklung. Die hier dargestellten Inhalte sind daher unvollständig und fehleranfällig. Über Fehlerberichte, Vorschläge und Ideen freuen wir uns immer gerne. Schickt uns dafür eine eMail unter dev ät telekneipe oder öffnet einen Issue auf unserem <a href="https://github.com/shitlabs/telekneipe" target="_blank">github</a>.
+          Dies ist die Developer Version der Telekneipe. Zur aktuellen Stabilen Version bitte auf <a href="https://www.telekneipe.de">www.telekneipe.de</a>
           <div id="modalWarning"></div>        
         </div>
       </div>
@@ -97,7 +97,7 @@
             try {
               table = new Tableservice();
               table.registerUI();
-                            
+              $.exposed = {table:table};
             } catch (err) {
               if (err.message.includes("WebGL unsupported")) {
                 $("#modalWarning").html("<p>Fehler: Dein Browser unterstützt kein WebGL. Leider ist die Telekneipe ohne WebGL zur Zeit nicht unterstützt.</p>");  
