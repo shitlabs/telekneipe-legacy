@@ -32,7 +32,7 @@ export class BaseTable {
 export class DefaultTable extends BaseTable {
   constructor(onLoad) {
     super("sprites/basicTable.json",onLoad);
-    this.protectArea = {top: 50, left: 100, bottom: 150, right: 250};
+    this.protectArea = {top: 100, left: 100, bottom: 150, right: 250};
     this.giveUpHeight = true;
     this.giveUpWidth = false;
   }
@@ -200,8 +200,8 @@ export class VideoKitchen {
 
       this.backgroundSprite.width = size.x;
       this.backgroundSprite.height = size.y;
-      this.backgroundSprite.x = size.width-size.x;
-      this.backgroundSprite.y = size.height-size.y;
+      this.backgroundSprite.x = (size.width-size.x)/2;
+      this.backgroundSprite.y = (size.height-size.y)/2;
       let frame_width = 235;
       let frame_height = 235;
       if (this.localStream) {
@@ -221,8 +221,8 @@ export class VideoKitchen {
   placeElementOnGrid(frame_width,frame_height,size) {
     let rows = ~~(size.height/frame_height);
     let cols = ~~(size.width/frame_width);
-    let ypad = size.height % frame_height;
-    let xpad = size.width % frame_width;
+    let ypad = (size.height % frame_height)/cols;
+    let xpad = (size.width % frame_width)/rows;
 
     let n_row = 0;
     let n_col = 0;
@@ -252,10 +252,10 @@ export class VideoKitchen {
 
     let framescale = 1;
     // check if we should scale up frames, max remotes 2        
-    if ((rows > (this.existingCalls.size+1)*2) && (cols > (this.existingCalls.size+1)*2)) {
+    if ((rows >= (this.existingCalls.size+1)*2) || (cols >= (this.existingCalls.size+1)*2)) {
             // yes, scale twice
             framescale = 2;
-    } else if ((rows > (this.existingCalls.size+1)*1.5) && (cols > (this.existingCalls.size+1)*1.5)) {
+    } else if ((rows >= (this.existingCalls.size+1)*1.5) || (cols >= (this.existingCalls.size+1)*1.5)) {
             // yes, scale 1.5
             framescale = 1.5;
     }
@@ -280,7 +280,7 @@ export class VideoKitchen {
       let element = elements.next().value.container;
       if (this.existingCalls.size == 1) {
           // same as local but top right.
-          element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+          element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y - frame_height <= 0) ? 
               0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
           element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
               this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;

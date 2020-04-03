@@ -48,7 +48,7 @@ export class DefaultFrame extends MinimalFrame {
 
   loadTextures(callback) {    
     let loader = PIXI.Loader.shared;
-    
+
     if (loader.resources[this._spriteSheet]) {
       //FIXME: Bad code duplication.
       this.textures = loader.resources["sprites/basicFrame.json"].spritesheet.textures;
@@ -204,8 +204,9 @@ export class VideoFrame {
       this._stream.getAudioTracks()[0].enabled = !this._stream.getAudioTracks()[0].enabled;
       state = !this._stream.getAudioTracks()[0].enabled;
     } else {
-      this.videoElement.muted = !this.videoElement.muted;
-      state = this.videoElement.muted;
+      state = this.videoElement.muted
+      this.videoElement.muted = !state;
+      state = !state;
     }
     this.muteButton.texture = state ? this._frames.FrameMuteIcon : this._frames.FrameVolIcon;
   }
