@@ -37,7 +37,6 @@ export class DefaultFrame extends MinimalFrame {
     super();
     this._spriteSheet = "sprites/basicFrame.json";
     this.loaded = false;
-    let loader = PIXI.Loader.shared;
     this.offsetVideo = {x: 27, y: 27};
     this.offsetFrame = {x: 0, y:0}
     this.offsetMute = {x: 170, y:45};
@@ -48,6 +47,8 @@ export class DefaultFrame extends MinimalFrame {
   }
 
   loadTextures(callback) {    
+    let loader = PIXI.Loader.shared;
+    
     if (loader.resources[this._spriteSheet]) {
       //FIXME: Bad code duplication.
       this.textures = loader.resources["sprites/basicFrame.json"].spritesheet.textures;
@@ -232,7 +233,8 @@ export class VideoFrame {
   }
 
   setFrame(frameClass) {
-    this._frames = frameClass(()=>{
+    this._frames = frameClass()
+    this._frames.loadTextures(()=>{
       // TODO: Do we need to set new height x width?
       this.videoSprite.x =  this._frames.offsetVideo.x;
       this.videoSprite.y = this._frames.offsetVideo.y;

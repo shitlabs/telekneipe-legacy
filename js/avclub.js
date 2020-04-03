@@ -188,9 +188,7 @@ export class VideoKitchen {
 
   cleanUpAvatar(call,instance) {
     if (instance != undefined) {
-      if (instance.slotIndex>=0) {
-        this.allocated_slots[instance.slotIndex] = false;
-      }          
+      this.app.stage.removeChild(instance.container);
     }
   }
 
@@ -352,7 +350,7 @@ export class VideoKitchen {
         this.cleanUpAvatar(call.peer,this.existingCalls.get(call.peer));
         this.existingCalls.delete(call.peer);
       }
-  
+
 
       
       //let remotevideo,container;
