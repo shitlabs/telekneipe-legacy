@@ -218,7 +218,7 @@ export class VideoKitchen {
     }
   }
 
-  placeElementOnGrid(frame_width,frame_height,size) {
+  placeElementsOnGrid(frame_width,frame_height,size) {
     let rows = ~~(size.height/frame_height);
     let cols = ~~(size.width/frame_width);
     let ypad = (size.height % frame_height)/cols;
@@ -327,8 +327,8 @@ export class VideoKitchen {
         element = elements.next().value;
         if (element) {
           element=element.container;
-          element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
-              0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+          element.y = (this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y+frame_height <= size.height) ? 
+              this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y : size.height-frame_height;
           element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
               this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
           element.scale.x = framescale;
