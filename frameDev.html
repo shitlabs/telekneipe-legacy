@@ -92,11 +92,12 @@
         var table;
 
 
-        //$(function() {
+        $(function() {
             start_fabulation(meta)(meta["{{ root }}"]);
             try {
               table = new Tableservice();
               table.registerUI();
+              $.exposed = {table:table};
             } catch (err) {
               if (err.message.includes("WebGL unsupported")) {
                 $("#modalWarning").html("<p>Fehler: Dein Browser unterstützt kein WebGL. Leider ist die Telekneipe ohne WebGL zur Zeit nicht unterstützt.</p>");  
@@ -132,7 +133,7 @@
               });
               $(this).data('rotate', !deg);
             });            
-        //});
+        });
 
     </script>
   </body>

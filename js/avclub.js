@@ -292,7 +292,7 @@ export class VideoKitchen {
         let min_padding = 30;
         let y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
             0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
-        let element = elements.next().value.container;
+        //let element = elements.next().value.container;
         let x = 0;
         if (cols >=3) {             
             // we can place two in top row with padding.            
@@ -307,7 +307,7 @@ export class VideoKitchen {
             element.y = y;
             element.scale.x = framescale;
             element.scale.y = framescale;               
-            element = elements.next().value;
+            element = elements.next().value.container;
             element.x = x+frame_width+min_padding;
             element.y = y;
             element.scale.x = framescale;
@@ -317,7 +317,7 @@ export class VideoKitchen {
             element.y = y;
             element.scale.x = framescale;
             element.scale.y = framescale;
-            element = elements.next().value;
+            element = elements.next().value.container;
             element.x = size.width-frame_width;
             element.y = y;
             element.scale.x = framescale;
