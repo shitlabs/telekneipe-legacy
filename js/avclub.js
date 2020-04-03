@@ -236,6 +236,7 @@ export class VideoKitchen {
       //file x from right and y from top
       element.container.x = size.width-(n_col+1)*frame_width-n_col*xpad;
       element.container.y = n_row*frame_height+n_row*ypad;
+      n_col++;
     }
 
     this.localFrame.container.x=0;
@@ -294,9 +295,9 @@ export class VideoKitchen {
             0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
         //let element = elements.next().value.container;
         let x = 0;
-        if (cols >=3) {             
+        if (cols >3) {             
             // we can place two in top row with padding.            
-            if ((frame_width*2+min_padding)+this.backgroundSprite.x+this.table.protectArea.left*this.backgroundSprite.scale.x <= size.width) {
+            if ((frame_width*2+min_padding)+this.backgroundSprite.x+this.table.protectArea.right*this.backgroundSprite.scale.x <= size.width) {
               // place both right of reserved zone
               x = this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x;
             } else {
