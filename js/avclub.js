@@ -15,13 +15,16 @@ export class BaseTable {
     this.protectArea = {};
     this.giveUpHeight = true;
     this.giveUpWidth = true;
-
-    loader.add(spriteSheet);
-    loader.load((loader,resources) => {      
-      this.textures = resources[spriteSheet].spritesheet.textures;
-      this.animations  = resources[spriteSheet].spritesheet.animations;
-      onLoad();
-    });    
+    if (loader.resources[spriteSheet]) {
+      onLoad()
+    } else {
+      loader.add(spriteSheet);
+      loader.load((loader,resources) => {      
+        this.textures = resources[spriteSheet].spritesheet.textures;
+        this.animations  = resources[spriteSheet].spritesheet.animations;
+        onLoad();
+      });    
+    }
   }
 }
 
@@ -273,65 +276,66 @@ export class VideoKitchen {
     
     this.localFrame.container.scale.x = framescale;
     this.localFrame.container.scale.y = framescale;
-
-    let elements = this.existingCalls.values();
-    // now we need to figure out how many need to be placed.
-    let element = elements.next().value.container;
-    if (this.existingCalls.size == 1) {
-        // same as local but top right.
-        element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
-            0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
-        element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
-            this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
-
-        element.scale.x = framescale;
-        element.scale.y = framescale;
-    }  
-    else if (this.existingCalls.size >= 2) {
-      let min_padding = 30;
-      let y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
-          0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+    if (this.existingCalls.size > 0) {
+      let elements = this.existingCalls.values();
+      // now we need to figure out how many need to be placed.
       let element = elements.next().value.container;
-      let x = 0;
-      if (cols >=3) {             
-          // we can place two in top row with padding.            
-          if ((frame_width*2+min_padding)+this.backgroundSprite.x+this.table.protectArea.left*this.backgroundSprite.scale.x <= size.width) {
-            // place both right of reserved zone
-            x = this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x;
-          } else {
-            // place on right border (keep order).
-            x = size.width - (2*frame_width+min_padding);
-          }
-          element.x = x;
-          element.y = y;
-          element.scale.x = framescale;
-          element.scale.y = framescale;               
-          element = elements.next().value;
-          element.x = x+frame_width+min_padding;
-          element.y = y;
-          element.scale.x = framescale;
-          element.scale.y = framescale;
-      } else {                
-          element.x = 0;
-          element.y = y;
-          element.scale.x = framescale;
-          element.scale.y = framescale;
-          element = elements.next().value;
-          element.x = size.width-frame_width;
-          element.y = y;
-          element.scale.x = framescale;
-          element.scale.y = framescale;
-      }
+      if (this.existingCalls.size == 1) {
+          // same as local but top right.
+          element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+              0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+          element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
+              this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
 
-      element = elements.next().value;
-      if (element) {
-        element=element.container;
-        element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+          element.scale.x = framescale;
+          element.scale.y = framescale;
+      }  
+      else if (this.existingCalls.size >= 2) {
+        let min_padding = 30;
+        let y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
             0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
-        element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
-            this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
-        element.scale.x = framescale;
-        element.scale.y = framescale;
+        let element = elements.next().value.container;
+        let x = 0;
+        if (cols >=3) {             
+            // we can place two in top row with padding.            
+            if ((frame_width*2+min_padding)+this.backgroundSprite.x+this.table.protectArea.left*this.backgroundSprite.scale.x <= size.width) {
+              // place both right of reserved zone
+              x = this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x;
+            } else {
+              // place on right border (keep order).
+              x = size.width - (2*frame_width+min_padding);
+            }
+            element.x = x;
+            element.y = y;
+            element.scale.x = framescale;
+            element.scale.y = framescale;               
+            element = elements.next().value;
+            element.x = x+frame_width+min_padding;
+            element.y = y;
+            element.scale.x = framescale;
+            element.scale.y = framescale;
+        } else {                
+            element.x = 0;
+            element.y = y;
+            element.scale.x = framescale;
+            element.scale.y = framescale;
+            element = elements.next().value;
+            element.x = size.width-frame_width;
+            element.y = y;
+            element.scale.x = framescale;
+            element.scale.y = framescale;
+        }
+
+        element = elements.next().value;
+        if (element) {
+          element=element.container;
+          element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+              0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+          element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
+              this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
+          element.scale.x = framescale;
+          element.scale.y = framescale;
+        }
       }
     }
   }
