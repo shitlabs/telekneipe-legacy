@@ -194,24 +194,26 @@ export class VideoKitchen {
 
   rescale() {
     let size = VideoKitchen.calcGeometry();
-    this.app.renderer.resize(size.width, size.height);
+    if (this.app) {
+      this.app.renderer.resize(size.width, size.height);
 
-    this.backgroundSprite.width = size.x;
-    this.backgroundSprite.height = size.y;
-    this.backgroundSprite.x = size.width-size.x;
-    this.backgroundSprite.y = size.height-size.y;
-    let frame_width = 235;
-    let frame_height = 235;
-    if (this.localStream) {
-        if (((size.width< 2*frame_width) || (size.height< 2*frame_height)) && (this.existingCalls.size > 1)) {
-            // need to switch to minimal mode 
-        }
+      this.backgroundSprite.width = size.x;
+      this.backgroundSprite.height = size.y;
+      this.backgroundSprite.x = size.width-size.x;
+      this.backgroundSprite.y = size.height-size.y;
+      let frame_width = 235;
+      let frame_height = 235;
+      if (this.localStream) {
+          if (((size.width< 2*frame_width) || (size.height< 2*frame_height)) && (this.existingCalls.size > 1)) {
+              // need to switch to minimal mode 
+          }
 
-        if (this.existingCalls.size <4) {
-            this.placeElementsDynamically(frame_width,frame_height,size);
-        } else {
-            this.placeElementsOnGrid(frame_width,frame_height,size);
-        }
+          if (this.existingCalls.size <4) {
+              this.placeElementsDynamically(frame_width,frame_height,size);
+          } else {
+              this.placeElementsOnGrid(frame_width,frame_height,size);
+          }
+      }
     }
   }
 
@@ -235,10 +237,10 @@ export class VideoKitchen {
       element.container.y = n_row*frame_height+n_row*ypad;
     }
 
-    this.localStream.container.x=0;
-    this.localStream.container.y=size.height-frame_height;
-    this.localStream.container.scale.x = 1;
-    this.localStream.container.scale.y = 1;
+    this.localFrame.container.x=0;
+    this.localFrame.container.y=size.height-frame_height;
+    this.localFrame.container.scale.x = 1;
+    this.localFrame.container.scale.y = 1;
 
   }
 
@@ -264,13 +266,13 @@ export class VideoKitchen {
 
     // stick to default (or switch?)
     // try to place loopback at lower left corner of table
-    this.localStream.container.y = (this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y+frame_height <= size.height) ? 
+    this.localFrame.container.y = (this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y+frame_height <= size.height) ? 
         this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y : size.height-frame_height;
-    this.localStream.container.x = (this.backgroundSprite.x + this.table.protectArea.left*this.backgroundSprite.scale.x-frame_width <= 0) ? 
+    this.localFrame.container.x = (this.backgroundSprite.x + this.table.protectArea.left*this.backgroundSprite.scale.x-frame_width <= 0) ? 
         0 : this.backgroundSprite.x + this.table.protectArea.left*this.backgroundSprite.scale.x-frame_width;
     
-    this.localStream.container.scale.x = framescale;
-    this.localStream.container.scale.y = framescale;
+    this.localFrame.container.scale.x = framescale;
+    this.localFrame.container.scale.y = framescale;
 
     let elements = this.existingCalls.values();
     // now we need to figure out how many need to be placed.
