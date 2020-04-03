@@ -189,6 +189,8 @@ export class VideoKitchen {
   cleanUpAvatar(call,instance) {
     if (instance != undefined) {
       this.app.stage.removeChild(instance.container);
+      instance.videoElement.remove();
+      instance.videoElement = null;
     }
   }
 
