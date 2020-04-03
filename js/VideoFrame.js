@@ -33,12 +33,40 @@ export class DefaultFrame {
     this.videoTint = 0xe0b888;
   }
 
+
   static preLoad() {
     let loader = PIXI.Loader.shared;
     loader.add("sprites/basicFrame.json");
     loader.load();
   }
 }
+
+
+export class MinimalFrame {
+  constructor(onLoad) {
+    this.FrameTexture = undefined;
+    this.FrameTexture_filled = undefined;
+    this.FrameVolIcon = undefined;
+    this.FrameMuteIcon = undefined;
+    this.VideoIcon = undefined;
+    this.VideoMuteIcon = undefined;
+
+    this.offsetVideo = {x: 0, y: 0};
+    this.offsetFrame = {x: 0, y:0}
+    this.offsetMute = {x: 170, y:45};
+    this.offsetVideoMute = {x:45, y:45};
+    this.offsetIdText = {x:120,y:120};
+
+    this.videoTint = 0xe0b888;
+
+    onLoad();
+
+  }
+
+  static preLoad() {    
+  }
+}
+
 
 export class VideoFrame {
   constructor(stream,selfie = false,peerId=null) {
@@ -187,8 +215,43 @@ export class VideoFrame {
     this.volume = this._internalVolume;
   }
 
-  setTable(tableInstane) {
-    this._frames = tableInstance;
-    // TODO: Update all sprites.
+  setFrame(frameClass) {
+    this._frames = frameClass(()=>{
+      // TODO: Do we need to set new height x width?
+      this.videoSprite.x =  this._frames.offsetVideo.x;
+      this.videoSprite.y = this._frames.offsetVideo.y;
+
+      this.frame.texture = this._frames.FrameTexture;
+      this.frame.x = this._frames.offsetFrame.x;
+      this.frame.y = this._frames.offsetFrame.y;
+
+      this.overlaySprite.texture = this._frames.FrameTexture_filled;
+      this.overlaySprite.x = this._frames.offsetFrame.x;
+      this.overlaySprite.y = this._frames.offsetFrame.y;
+
+      this.muteButton.x = this._frames.offsetMute.x;
+      this.muteButton.y = this._frames.offsetMute.y;    
+
+      let state = false;
+      if (this.selfie) {
+        state = !this._stream.getAudioTracks()[0].enabled;
+      } else {
+        state = this.videoElement.muted;
+      }
+      this.muteButton.texture = state ? this._frames.FrameMuteIcon : this._frames.FrameVolIcon;
+
+      if (this.selfie) {
+        this.videoMuteButton.x = this._frames.offsetVideoMute.x;
+        this.videoMuteButton.y = this._frames.offsetVideoMute.y;
+        this.videoMuteButton.texture = this._stream.getVideoTracks()[0].enabled ? this._frames.VideoIcon : this._frames.VideoMuteIcon;
+      }
+
+      if (this.remoteId) {
+            this.textId.x = this._frames.offsetIdText.x;
+            this.textId.y = this._frames.offsetIdText.y;
+      }
+    });
+    
+
   }
 }

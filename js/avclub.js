@@ -12,6 +12,10 @@ export class BaseTable {
     let loader = PIXI.Loader.shared;
     this.textures = {}
     this.resources = {}
+    this.protectArea = {};
+    this.giveUpHeight = true;
+    this.giveUpWidth = true;
+
     loader.add(spriteSheet);
     loader.load((loader,resources) => {      
       this.textures = resources[spriteSheet].spritesheet.textures;
@@ -25,11 +29,14 @@ export class BaseTable {
 export class DefaultTable extends BaseTable {
   constructor(onLoad) {
     super("sprites/basicTable.json",onLoad);
+    this.protectArea = {top: 50, left: 100, bottom: 150, right: 250};
+    this.giveUpHeight = true;
+    this.giveUpWidth = false;
   }
   getBackgroundSprite() {
-  	let background = new PIXI.AnimatedSprite(this.animations["frame"]);
-  	// overrite currentFrame to return a random frame
-  	background.updateTexture = function()
+    let background = new PIXI.AnimatedSprite(this.animations["frame"]);
+    // overrite currentFrame to return a random frame
+    background.updateTexture = function()
     {
         this._texture = this._textures[Math.floor(Math.random()* this._textures.length)];
         this._textureID = -1;
@@ -46,7 +53,7 @@ export class DefaultTable extends BaseTable {
         }
     }.bind(background);
 
-  	return background;
+    return background;
   }
 }
 
@@ -55,7 +62,7 @@ const positions = [{x:0, y:0},{x:266, y:0},{x:266*2, y:0},{x:0, y:266},{x:266, y
 
 export class VideoKitchen {
   constructor(logCB) {
-  	this.log = logCB;
+    this.log = logCB;
     // Global defines in tableservice namespace
     this.localStream = null;
     this.existingCalls = new Map();
@@ -78,7 +85,7 @@ export class VideoKitchen {
     this.webcamcanvas.style.width = "128px";
     this.webcamcanvas.style.height = "128px";
 
-  	// check if support is here
+    // check if support is here
     var msg = '', seriouslyFail = Seriously.incompatible();
     if (seriouslyFail) {
       if (status === 'canvas') {
@@ -139,12 +146,13 @@ export class VideoKitchen {
       target.source = in_source;
     }
 
-    let size = VideoKitchen.calcGeometry();
-
+    
+    let width = window.innerWidth;
+    let height = window.innerHeight-8;
     //create a Pixi Application
     this.app = new PIXI.Application({
-      width: size.x,         // default: 400
-      height: size.y,        // default: 400
+      width: width,         // default: 400
+      height: height,        // default: 400
       view: document.getElementById("screen")
     });
 
@@ -152,18 +160,22 @@ export class VideoKitchen {
     this.app.renderer.view.style.touchAction = "auto";
     this.app.renderer.view.style.margin = "auto";
     this.app.renderer.view.style.display = "block";
+    // on rescale
+    window.addEventListener('resize', this.rescale);
+
     // never not be pixely :)
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     this.table = new DefaultTable(() => {
-	    this.backgroundSprite = this.table.getBackgroundSprite();
-	    this.backgroundSprite.width = size.x;
-	    this.backgroundSprite.height = size.y;
-	    this.backgroundSprite.x = 0;
-	    this.backgroundSprite.y = 0;
-	    this.backgroundSprite.animationSpeed = 0.1;
-	    this.app.stage.addChild(this.backgroundSprite);
-	    this.backgroundSprite.play();
+        this.backgroundSprite = this.table.getBackgroundSprite();
+        let size = VideoKitchen.calcGeometry();
+        this.backgroundSprite.width = size.x;
+        this.backgroundSprite.height = size.y;
+        this.backgroundSprite.x = size.width-size.x;
+        this.backgroundSprite.y = size.height-size.y;
+        this.backgroundSprite.animationSpeed = 0.1;
+        this.app.stage.addChild(this.backgroundSprite);
+        this.backgroundSprite.play();
     });
 
 
@@ -180,6 +192,147 @@ export class VideoKitchen {
   }
 
 
+  rescale() {
+    let size = VideoKitchen.calcGeometry();
+    this.app.renderer.resize(size.width, size.height);
+
+    this.backgroundSprite.width = size.x;
+    this.backgroundSprite.height = size.y;
+    this.backgroundSprite.x = size.width-size.x;
+    this.backgroundSprite.y = size.height-size.y;
+    let frame_width = 235;
+    let frame_height = 235;
+    if (this.localStream) {
+        if (((size.width< 2*frame_width) || (size.height< 2*frame_height)) && (this.existingCalls.size > 1)) {
+            // need to switch to minimal mode 
+        }
+
+        if (this.existingCalls.size <4) {
+            this.placeElementsDynamically(frame_width,frame_height,size);
+        } else {
+            this.placeElementsOnGrid(frame_width,frame_height,size);
+        }
+    }
+  }
+
+  placeElementOnGrid(frame_width,frame_height,size) {
+    let rows = ~~(size.height/frame_height);
+    let cols = ~~(size.width/frame_width);
+    let ypad = size.height % frame_height;
+    let xpad = size.width % frame_width;
+
+    let n_row = 0;
+    let n_col = 0;
+    for (const element of this.existingCalls.values()) {
+      element.container.scale.x = 1;
+      element.container.scale.y = 1;
+      if (n_col>=cols) {
+        n_col = 0;
+        n_row++;
+      }
+      //file x from right and y from top
+      element.container.x = size.width-(n_col+1)*frame_width-n_col*xpad;
+      element.container.y = n_row*frame_height+n_row*ypad;
+    }
+
+    this.localStream.container.x=0;
+    this.localStream.container.y=size.height-frame_height;
+    this.localStream.container.scale.x = 1;
+    this.localStream.container.scale.y = 1;
+
+  }
+
+  placeElementsDynamically(frame_width,frame_height,size) {
+    // find out how many rows and cols we can have.
+    let rows = ~~(size.height/frame_height);
+    let cols = ~~(size.width/frame_width);
+
+    let framescale = 1;
+    // check if we should scale up frames, max remotes 2        
+    if ((rows > (this.existingCalls.size+1)*2) && (cols > (this.existingCalls.size+1)*2)) {
+            // yes, scale twice
+            framescale = 2;
+    } else if ((rows > (this.existingCalls.size+1)*1.5) && (cols > (this.existingCalls.size+1)*1.5)) {
+            // yes, scale 1.5
+            framescale = 1.5;
+    }
+    frame_height *= framescale;
+    frame_width *= framescale;
+
+    rows = ~~(size.height/frame_height);
+    cols = ~~(size.width/frame_width);
+
+    // stick to default (or switch?)
+    // try to place loopback at lower left corner of table
+    this.localStream.container.y = (this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y+frame_height <= size.height) ? 
+        this.backgroundSprite.y + this.table.protectArea.bottom*this.backgroundSprite.scale.y : size.height-frame_height;
+    this.localStream.container.x = (this.backgroundSprite.x + this.table.protectArea.left*this.backgroundSprite.scale.x-frame_width <= 0) ? 
+        0 : this.backgroundSprite.x + this.table.protectArea.left*this.backgroundSprite.scale.x-frame_width;
+    
+    this.localStream.container.scale.x = framescale;
+    this.localStream.container.scale.y = framescale;
+
+    let elements = this.existingCalls.values();
+    // now we need to figure out how many need to be placed.
+    let element = elements.next().value.container;
+    if (this.existingCalls.size == 1) {
+        // same as local but top right.
+        element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+            0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+        element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
+            this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
+
+        element.scale.x = framescale;
+        element.scale.y = framescale;
+    }  
+    else if (this.existingCalls.size >= 2) {
+      let min_padding = 30;
+      let y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+          0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+      let element = elements.next().value.container;
+      let x = 0;
+      if (cols >=3) {             
+          // we can place two in top row with padding.            
+          if ((frame_width*2+min_padding)+this.backgroundSprite.x+this.table.protectArea.left*this.backgroundSprite.scale.x <= size.width) {
+            // place both right of reserved zone
+            x = this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x;
+          } else {
+            // place on right border (keep order).
+            x = size.width - (2*frame_width+min_padding);
+          }
+          element.x = x;
+          element.y = y;
+          element.scale.x = framescale;
+          element.scale.y = framescale;               
+          element = elements.next().value;
+          element.x = x+frame_width+min_padding;
+          element.y = y;
+          element.scale.x = framescale;
+          element.scale.y = framescale;
+      } else {                
+          element.x = 0;
+          element.y = y;
+          element.scale.x = framescale;
+          element.scale.y = framescale;
+          element = elements.next().value;
+          element.x = size.width-frame_width;
+          element.y = y;
+          element.scale.x = framescale;
+          element.scale.y = framescale;
+      }
+
+      element = elements.next().value;
+      if (element) {
+        element=element.container;
+        element.y = (this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height <= 0) ? 
+            0 : this.backgroundSprite.y + this.table.protectArea.top*this.backgroundSprite.scale.y-frame_height;
+        element.x = (this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x+frame_width <= size.width) ? 
+            this.backgroundSprite.x + this.table.protectArea.right*this.backgroundSprite.scale.x : size.width-frame_width;
+        element.scale.x = framescale;
+        element.scale.y = framescale;
+      }
+    }
+  }
 
   processCall (call) {
     // Wait for stream on the call, then set peer video display
@@ -194,35 +347,27 @@ export class VideoKitchen {
         this.existingCalls.delete(call.peer);
       }
 
-      // TODO: Decide if table needs to be swapped.
-
-      // placement: Find free slot, get position
-      let ind_slot = this.allocated_slots.findIndex(element => !element);
 
       
       //let remotevideo,container;
       let newFrame = new VideoFrame(stream,false,call.peer);
       newFrame.remoteId = call.peer;
-      newFrame.slotIndex = ind_slot;
+
       
 
-      if (ind_slot < 0) {
-        this.log("Space on your table is running out, someone will have to keep standing.");
-      } else {
-        newFrame.container.x = positions[ind_slot].x
-        newFrame.container.y = positions[ind_slot].y;
+      newFrame.container.x = 0;
+      newFrame.container.y = 0;
 
 
-        this.app.stage.addChild(newFrame.container);
-
-        // mark slot as used
-        this.allocated_slots[ind_slot] = true;
-      }
+      this.app.stage.addChild(newFrame.container);
+      
 
 
       // insert entry into existingCalls
       this.existingCalls.set(call.peer,newFrame);
 
+      // update placement
+      this.rescale();
     });
 
 
@@ -230,6 +375,7 @@ export class VideoKitchen {
     call.on('close', () => {
       this.cleanUpAvatar(call.peer,this.existingCalls.get(call.peer));
       this.existingCalls.delete(call.peer);
+      this.rescale();
     });    
   }
 
@@ -275,7 +421,7 @@ export class VideoKitchen {
 
 
       this.app.stage.addChild(this.localFrame.container);
-
+      this.rescale()
 
 
       $("#step1").hide();
@@ -288,7 +434,7 @@ export class VideoKitchen {
   }
 
   closeCalls() {
-	  // end call
+      // end call
       for (let [key, value] of this.existingCalls) {
         this.cleanUpAvatar(key,value);
         // end call
@@ -296,19 +442,22 @@ export class VideoKitchen {
         // remove element
         this.existingCalls.delete(key);
       }
+      this.rescale();
   }
 
 
   static calcGeometry() {
-  	let width = window.innerWidth;
-  	let height = window.innerHeight-8;
+    let width = window.innerWidth;
+    let height = window.innerHeight-8;
 
-  	if (width/height>=16/9) {
-  		width = height*16/9;
-  	} else {
-  		height = width*9/16;
-  	}
-  	return {x: width, y:height};
+    let s_width = width;
+    let s_height = height;
+    if (width/height>=16/9) {
+        s_width = height*16/9;
+    } else {
+        s_height = width*9/16;
+    }
+    return {x: s_width, y:s_height,width: width, height: height };
   }
 
 }
