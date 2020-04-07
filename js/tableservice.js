@@ -96,7 +96,7 @@ export class Tableservice {
         console.log(data);
         if(data) {
           for (var new_peer in data) {
-            if (!this.connected_peers.includes(new_peer) && (new_peer != peer.id)) {
+            if (!this.connected_peers.includes(new_peer) && (new_peer != this.peer.id)) {
               people_to_call.push(data[new_peer]);
             }
           }
