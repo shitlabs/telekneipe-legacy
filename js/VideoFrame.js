@@ -127,7 +127,7 @@ export class DefaultAudioFrame extends MinimalFrame {
 }
 
 
-let FrameInterface {
+let FrameInterface = {
   init(stream,selfie = false,peerId=null,onLoadCB=null) {
     this.remoteId = peerId;
     this.slotIndex = null; //deprecated
@@ -197,15 +197,15 @@ let FrameInterface {
 
 
     this._internalVolume = 100;
-  }
+  },
 
   _showBack() {
     this.backsideContainer.visible = true;
-  }
+  },
 
   _hideBack() {
     this.backsideContainer.visible = false;
-  }
+  },
 
   toggleMute() {
     let state = false;
@@ -218,31 +218,32 @@ let FrameInterface {
       state = !state;
     }
     this.muteButton.texture = state ? this._frames.FrameMuteIcon : this._frames.FrameVolIcon;
-  }
+  },
 
   videoMute() {
     if (this._stream.getVideoTracks()) {
       this._stream.getVideoTracks()[0].enabled = !this._stream.getVideoTracks()[0].enabled;
       this.videoMuteButton.texture = this._stream.getVideoTracks()[0].enabled ? this._frames.VideoIcon : this._frames.VideoMuteIcon;
     }
-  }
+  },
 
   set volume(val) {
     this.videoElement.volume = val;
-  }
+  },
 
   get volume() {
-    this.videoElement.volume;
-  }
+    if (this.videoElement) return (this.videoElement.volume);
+    return 0;
+  },
 
   duck(vol=10) {
     this._internalVolume = this.volume;
     this.volume = vol;
-  }
+  },
 
   unduck() {
     this.volume = this._internalVolume;
-  }
+  },
 
   unload() {
     if (this.videoElement) {
@@ -250,49 +251,8 @@ let FrameInterface {
       this.videoElement.muted = true;
       this.videoElement.removeAttribute('srcObject');    
     }
-  }
-/*
-  setFrame(frameClass) {
-    this._frames = frameClass()
-    this._frames.loadTextures(()=>{
-      // TODO: Do we need to set new height x width?
-      this.videoSprite.x =  this._frames.offsetVideo.x;
-      this.videoSprite.y = this._frames.offsetVideo.y;
-
-      this.frame.texture = this._frames.FrameTexture;
-      this.frame.x = this._frames.offsetFrame.x;
-      this.frame.y = this._frames.offsetFrame.y;
-
-      this.overlaySprite.texture = this._frames.FrameTexture_filled;
-      this.overlaySprite.x = this._frames.offsetFrame.x;
-      this.overlaySprite.y = this._frames.offsetFrame.y;
-
-      this.muteButton.x = this._frames.offsetMute.x;
-      this.muteButton.y = this._frames.offsetMute.y;    
-
-      let state = false;
-      if (this.selfie) {
-        state = !this._stream.getAudioTracks()[0].enabled;
-      } else {
-        state = this.videoElement.muted;
-      }
-      this.muteButton.texture = state ? this._frames.FrameMuteIcon : this._frames.FrameVolIcon;
-
-      if (this.selfie && this._stream.getVideoTracks()) {
-        this.videoMuteButton.x = this._frames.offsetVideoMute.x;
-        this.videoMuteButton.y = this._frames.offsetVideoMute.y;
-        this.videoMuteButton.texture = this._stream.getVideoTracks()[0].enabled ? this._frames.VideoIcon : this._frames.VideoMuteIcon;
-      }
-
-      if (this.remoteId) {
-            this.textId.x = this._frames.offsetIdText.x;
-            this.textId.y = this._frames.offsetIdText.y;
-      }
-    });
-    
-
-  }
-  */
+  },
+  
 }
 
 
