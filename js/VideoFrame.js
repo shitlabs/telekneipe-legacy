@@ -264,7 +264,7 @@ export class AudioFrame {
     if (!selfie) {
       this.videoElement = document.createElement("audio");
       this.videoElement.autoplay = true;
-      this.videoElement.srcObject = this._stream;
+      this.videoElement.srcObject = stream;
       this.videoElement.play();
     }
 
@@ -296,7 +296,7 @@ export class VideoFrame {
     this.videoElement = document.createElement("video");         
     this.videoElement.autoplay = true;
     this.videoElement.playsinline = true;
-    this.videoElement.srcObject = this._stream;
+    this.videoElement.srcObject = stream;
     this.videoElement.play();
 
     this.init(stream,selfie,peerId, () => {   

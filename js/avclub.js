@@ -401,6 +401,7 @@ export class VideoKitchen {
 
     if (this.debugForceAudio) {
       this.initMicOnlyStream();
+      return;
     }
 
 
