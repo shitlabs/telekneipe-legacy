@@ -1,12 +1,11 @@
 import {VideoKitchen} from './avclub.js';
-import {createCookie,readCookie,eraseCookie} from './util.js';
 
 
-const _MIN_VERSION = 0.1;
-const _VERSION = 0.1;
 
 export class Tableservice {
-  constructor() {
+  constructor(parent) {
+    this.parent = parent;
+    this.logToReceipt = this.parent.logToReceipt;
     this.avclub = new VideoKitchen(this.logToReceipt);
     // PeerJS object
     this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: 
@@ -21,20 +20,6 @@ export class Tableservice {
     this.video_peers = {};
 
 
-    // try to read cookies
-    this.skipCookies = readCookie("aC")>= _MIN_VERSION ? createCookie("aC",readCookie("aC"),14) : false;
-    this.skipFrequent = readCookie("sF") == "2" ? true : false;
-    
-    if (readCookie("sF") && this.skipCookies) {
-      createCookie("sF",readCookie("sF"),14);
-      if (parseInt(readCookie("nV"))) createCookie("nV",parseInt(readCookie("nV")+1,14);
-    }
-
-    this.lang = "de"
-    if (this.skipCookies && this.readCookie("en")) {
-      this.lang = "en";
-      createCookie("en","1",14);
-    }
 
     //
     // Register PeerJS Callbacks
@@ -49,27 +34,26 @@ export class Tableservice {
     this.peer.on('connection', (conn) => {
       // TODO: Ask user for connection permission?
       conn.on('open', () => {        
-        this.askConnection(conn,false,() => {
+        this.parent.askConnection(conn,false,() => {
           this.trusted_peers.add(conn.peer)
           this.connected_peers[conn.peer] = conn;
           this.logToReceipt(`${conn.peer} comes to you.`)
           console.log("Sending connected_peers");
           console.log(this.connected_peers);
-          conn.send({accept: true, peers: this.connected_peers})
-        ;}, 
+          conn.send({accept: true, peers: this.connected_peers});
+          this.handleData(connection);
+        }, 
         () => {
           console.log("Connection rejected");
           this.banned_peers.add(conn.peer);
         });
-
+      });
       conn.on('close', () => {
         this.connected_peers[conn.peer] = undefined;
-      }
-
-      conn.on('data', () => {
-
-      })
       });
+
+      
+      
       
     });
 
@@ -109,65 +93,30 @@ export class Tableservice {
 
   }
 
-  askConnection(connection,alwaysAsk=false,cbAccept,cbDenied) {
-    // pass
+
+  handleData(connection) {
+    connection.on('data', (data) => {
+      // pass
+    })
   }
-
-  logToReceipt(msg) {
-    $("#console").append("div").addClass("msg").text(msg);
-    // make the button flash
-    $("#receiptButton").fadeOut("fast",function() {$("#receiptButton").fadeIn(); });
-  }
-
-
-  showReceipt() {
-    $(".receipt").show();
-  }
-
-  offerCookies() {
-    createCookie("aC",_VERSION,14);
-    createCookie("sF","0",14);
-    createCookie("nV","1",14);
-    if (window.location.pathname.includes("index_en.html")) {
-      table.lang = "en";
-      createCookie("en","1",14);
-    }
-  }
-
-  clubMarke() {
-    if (this.skipCookies && readCookie("sF") != "1" && (parseInt(readCookie("nV"))) > 5) {
-      let quest_text = this.lang == "en" ? "It seems you're here quite often. Do you want to directly go to the barkeep on your next visits?" : "Scheint so als wärst du einer unserer Stammgäste. Möchtest du bei deinen nächsten Besuchen direkt zur Bar geleitet werden?";
-      let quest_choice_yes = $("<span class='fl'>").text(this.lang == "en" ? "Yes, please give me a Telekneipe Clubmarke" : "Ja, bitte gebt mir eine Telekneipe Clubmarke");
-      let quest_choice_no = $("<span class='fl'>").text(this.lang == "en" ? "No, I enjoy the experience (we will not ask again)" : "Nein, mir gefällt die Experience (wir fragen nicht noch mal)");
-      let quest_choice_next = $("<span class='fl'>").text(this.lang == "en" ? "Maybe next time" : "Vielleicht beim nächsten Mal");
-      let quest_callback = function(choice) {if (this.skipCookies) createCookie("sF",choice,14); hideModal(); };
-
-      prepareModal("Clubmarke",quest_text,false);
-      let list = $("<ul />");
-      list.append($("<li />")).append(quest_choice_yes).click(quest_callback.bind(this,"2"));
-      list.append($("<li />")).append(quest_choice_no).click(quest_callback.bind(this,"0"));
-      list.append($("<li />")).append(quest_choice_maybe).click(quest_callback.bind(this,"1"));
-      $('#modalBody').append(list);
-    }
-    showModal();    
-  }
-
-
-  prepareCall(callerId) {
-    // display our scene
-    $('#table_container').show();
-    // hide callpad
-    $('#call_pad').hide();
-    makeCall(callerId);
-  }
-
+ 
   handleNewConnection(connection) {
     this.connected_peers[connection.peer] = connection;
     connection.on('close', () => {
       this.connected_peers[connection.peer] = undefined;
     });
+    connection.on('data', () => {
+      this.handleData(connection)
+    }
   }
 
+
+  closeConnections() {
+    for (peerId in this.connected_peers) {
+      this.connected_peers[peerId].close();
+      this.connected_peers[peerId] = undefined;
+    }
+  }
 
   initalizeMeshedConnections(callerId,onConnect) {
     if (this.banned_peers.has(callerId)) return allPeers; // don't add this peer, don't open a connection => return empty list.
@@ -181,7 +130,7 @@ export class Tableservice {
     let connection = this.peer.connect(callerId);
     connection.on('open', () => {
       connection.on('data',(data) => {
-        console.log(`Received connected peers from remote ${callerId}`);
+        console.log(`Received data from remote ${callerId}`);
         console.log(data);
         if (data.accept) {
           // should we auto-trust people we call? For now, yes
@@ -226,73 +175,6 @@ export class Tableservice {
   }
 
 
-
-
-
-
-
-  
-  registerUI() {
-    // Register UI events.
-
-    $('#make-call').click(() => {
-      this.makeCall($('#callto-id').val());
-    });
-
-    // Retry if getUserMedia fails
-    $('#hwaccess-retry-button').click(() => {
-      $('#hwaccess-retry').hide();
-      this.avclub.initWebcamStream();
-    });
-
-    // bind events triggered from fabulation
-    // these should bubble up to the content-class div #catch_events
-    $('#catch_events').on("tableservice.host", () => {
-      if (!this.avclub.localStream) {
-        $("#hwaccess").show()
-        this.avclub.initWebcamStream();
-      }
-      this.showReceipt();
-      // display our scene      
-      $('#table_container').show();
-      // maybe set text so that it's clear what the table's name is?
-
-    });
-
-    $('#catch_events').on("tableservice.call", () => {
-      if (!this.avclub.localStream) {
-        $("#hwaccess").show()        
-        this.avclub.initWebcamStream();
-      }
-      this.showReceipt();
-      // display the call screen
-      $('#call_pad').show();
-
-    });
-
-    $('#catch_events').on("tableservice.hide_call", () => {
-      $("#hwaccess").hide()        
-      $('#call_pad').hide();
-
-    });
-
-    $('#catch_events').on("tableservice.end", () => {
-      this.avclub.closeCalls()
-      this.connected_peers = [];
-      // hide 
-      $('#table_container').hide();      
-    });
-
-    $('#catch_events').on("tableservice.receipt", () => {
-      this.showReceipt();
-    });
-
-    $('#catch_events').on("tableservice.acceptCookies", () => {
-      this.offerCookies();
-    })
-
-
-  }
 
 
 

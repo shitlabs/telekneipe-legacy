@@ -74,7 +74,6 @@ export class DefaultFrame extends MinimalFrame {
     }
   }
 
-
   static preLoad() {
     let loader = PIXI.Loader.shared;
     loader.add("sprites/basicFrame.json");
@@ -82,7 +81,50 @@ export class DefaultFrame extends MinimalFrame {
   }
 }
 
+export class AudioFrame extends MinimalFrame {
+  constructor() {
+    super();
+    this._spriteSheet = "sprites/audioFrame.json";
+    this.loaded = false;
+    this.offsetVideo = {x: 10, y: 10};
+    this.offsetFrame = {x: 0, y:0}
+    this.offsetMute = {x: 66, y:45};
+    this.offsetVideoMute = {x:0, y:0};
+    this.offsetIdText = {x:20,y:80};
 
+    this.videoTint = 0xffffff;
+  }
+
+  loadTextures(callback) {    
+    let loader = PIXI.Loader.shared;
+
+    if (loader.resources[this._spriteSheet]) {
+      //FIXME: Bad code duplication.
+      this.textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
+      this.SpeakerTexture = this.textures["speaker_inner.png"]
+      this.FrameTexture = this.textures["speaker_frame.png"];
+      this.FrameTexture_filled = this.textures["speaker_frame_filled.png"];
+      this.FrameVolIcon = this.textures["volume.png"];
+      this.FrameMuteIcon = this.textures["volume_mute.png"];
+      this.VideoIcon = this.textures["video.png"];
+      this.VideoMuteIcon = this.textures["video_mute.png"];
+      callback();
+    } else {
+      loader.add("sprites/basicFrame.json");
+      loader.load((loader,resources) => {
+        this.textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
+        this.SpeakerTexture = this.textures["speaker_inner.png"]
+        this.FrameTexture = this.textures["speaker_frame.png"];
+        this.FrameTexture_filled = this.textures["speaker_frame_filled.png"];
+        this.FrameVolIcon = this.textures["volume.png"];
+        this.FrameMuteIcon = this.textures["volume_mute.png"];
+        this.VideoIcon = this.textures["video.png"];
+        this.VideoMuteIcon = this.textures["video_mute.png"];
+        callback();
+      });
+    }
+  }
+}
 
 
 export class FrameInterface {
@@ -96,7 +138,6 @@ export class FrameInterface {
 
     this.container = new PIXI.Container();
 
-    this._frames = new DefaultFrame();
     this._frames.loadTextures(() => {
 
       this.frame = new PIXI.Sprite(this._frames.FrameTexture);
@@ -257,6 +298,7 @@ export class FrameInterface {
 
 export class AudioFrame extends FrameInterface {
   constructor(stream, selfie = false, peerId=null) {
+    this._frames = new AudioFrame();
 
     // stream to sprite
     if (!selfie) {
@@ -269,8 +311,6 @@ export class AudioFrame extends FrameInterface {
     super(stream,selfie,peerID, () => {
 
       this.videoSprite = PIXI.Sprite.from(this._frames.SpeakerTexture);
-      this.videoSprite.width = 182;
-      this.videoSprite.height = 182;
       this.videoSprite.x =  this._frames.offsetVideo.x;
       this.videoSprite.y = this._frames.offsetVideo.y;
       this.videoSprite.zIndex = 20;
@@ -289,6 +329,7 @@ export class AudioFrame extends FrameInterface {
 
 export class VideoFrame extends FrameInterface {
   constructor(stream,selfie = false,peerId=null) {
+    this._frames = new DefaultFrame();
 
     //webcam to sprite
     this.videoElement = document.createElement("video");         

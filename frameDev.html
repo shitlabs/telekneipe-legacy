@@ -89,7 +89,7 @@
     </div>
 
     <script type="module">
-        import {Tableservice} from "./js/tableservice.js";
+        import {Telekneipe} from "./js/telekneipe.js";
         
         var meta = {{ meta }};
 
@@ -99,7 +99,7 @@
         $(function() {
             var fab = start_fabulation(meta);
             try {
-              table = new Tableservice();              
+              table = new Telekneipe();              
               table.registerUI();
               $.exposed = {table:table};
             } catch (err) {
