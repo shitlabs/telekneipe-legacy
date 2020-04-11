@@ -193,6 +193,7 @@ export class Tableservice {
           for (var new_peer of data.peers) {
             if (!this.connected_peers[new_peer] && (new_peer != peer.id)) {
               initalizeMeshedConnections(new_peer,onConnect);
+
             }
           }
         }

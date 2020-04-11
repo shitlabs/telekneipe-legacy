@@ -1,0 +1,132 @@
+---
+root:
+    fullpic: pics/dachterrasse.jpg
+    content: "### TELEKNEIPE"
+    next: cookiesAsk
+    onExit: tableservice.about 
+
+cookiesAsk:
+    content: "Outside of space and time, your consciousness lies in a comfortably warm priordial pool of nothing.
+
+
+            Nothing is and will never be.
+
+
+            When a questions forms in your lower spine and rises to your fronto-medial cortex:
+            ### Do I accept cookies?
+
+            - [Yes](exterior_cookies)
+            - [No](exterior)
+            - <a href=\"./index.html\">Sprechen Sie deutsch?</a>"
+
+
+exterior_cookies:
+    onEntrance: tableservice.acceptCookies
+    pic: pics/Eckkneipe_Kreuzung_anim96.gif
+    content: "In the far future, in a postapocalyptical ruin of a city, you find yourself in an empty crossing in front of a building. On the bottom floor a shopt is overgrown by lush green plants and some of the big windows are broken and taped shut.
+
+         You are about to move on, when out of the corner of your eye, behind one of the windows, you notice a movement.
+
+
+         - [Get closer](exterior2)"
+
+cookiesDont:
+    fullpic: pics/dachterrasse.jpg
+    content: "### TELEKNEIPE"
+    next: exterior
+    onExit: tableservice.about 
+
+
+
+exterior:
+    pic: pics/Eckkneipe_Kreuzung_anim96.gif
+    content: "In the far future, in a postapocalyptical ruin of a city, you find yourself in an empty crossing in front of a building. On the bottom floor a shopt is overgrown by lush green plants and some of the big windows are broken and taped shut.
+
+         You are about to move on, when out of the corner of your eye, behind one of the windows, you notice a movement.
+
+
+         - [Get closer](exterior2)"
+
+exterior2:
+    pic: pics/Eckkneipe_Eingang.png
+    content: "Above the entrance a long-gone neon sign says
+
+         ### BAR
+         
+         
+         The door is slightly ajar. Next to it, there is a small sign.
+
+
+         - [Get in](interior)
+
+         - [Read the sign](awareness)"
+
+awareness:
+    pic: pics/Eckkneipe_Schild.png
+    content: "Telekneipe is a virtual dive-bar experience. For that purpose, input from your microphone and images from your webcam are shared with others (your browser will ask you for permission before the data is acquired). Telekneipe has no access to this data, this webpage only helps you to broker a peer-to-peer connection to others.
+
+        The connection is encrypted by an end-to-end encryptions (DTLS and SRTP, using WebRTC). Since Telekneipe is an experimental software we can not guarantee that your conversations are private and not intercepted - by accident or malintent - by others. You can check the source code of Telekneipe <a href=\"https://github.com/shitlabs/telekneipe\">here</a>. Your bug reports and help is welcome!
+
+        The same rules of any good bar apply to Telekneipe, and we will not tolorate sexist, racist, homophobe, transphobe, antisemitic, antiislamic and any other discriminatory behaviour.
+        
+       - [Back](BACK1)"
+
+
+interior:
+    pic: pics/Eckkneipe_innen.png
+    content: "You enter into the interior twighlight of a shady bar. Large parts of the room is covered by a thick layer of dust and settled down smoke, but parts of the wooden floor are uncovered by footprints. They must be recent. You find sets of normal shoeprints and smaller, paw like. An electric hum lies in the air.
+
+        At the side of the room there is a counter. Behind the counter - a bartender. Lifeless.
+
+        - [Approach the counter](counter)"
+
+counter:    
+    content: "Getting closer, you realize that the barkeeper is a mechanical automaton. A grotesque figure with a beaker-like vent instead of a mouth and an electrical board in place of its chest. As you approach the bar, you hear the sound of spinning gears. A stream of musty warm air escapes the vent.
+
+
+        You hear the sound of an old timey needle printer and a slip of paper appears from a small slit on the top of the couner.
+
+        - [Take slip of paper](counter2)"
+
+counter2:        
+    content: "It gives you a weird ID. The automaton seems to come to live and a mechanical voice asks you:
+
+        ### Welcome to the Telebar. How may I help you?
+        
+        - [Can I have a table?](table)
+
+        - [I'm looking for someone...](call)"
+
+table:
+    content: "### Follow me!
+
+        says the barkeep, but does not seem to make any effort to move. In the room next to the counter a spot of light appears, pointing to an empty table.        
+
+        - [Sit down at the table](table_sit)
+
+        - [...wait!](counter_late)"
+
+table_sit:
+    onEntrance: tableservice.host
+    onExit: tableservice.end
+    content: "- [Go to the counter](counter_late)"
+
+call:
+    onEntrance: tableservice.call
+    onExit: tableservice.hide_call
+    content: "- [Go to the counter](counter_late)"
+
+counter_late:
+    content: "### Welcome to the Telebar. How may I help you?
+        
+        - [Can I have a table?](table)
+
+        - [I'm looking for someone...](call)
+
+        - [Goodbye!](exit)"
+
+
+exit:
+    onEntrance: tableservice.end
+    content: "### See you tomorrow
+                Exhales the automaton. You leave"
