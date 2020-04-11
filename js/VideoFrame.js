@@ -127,8 +127,8 @@ export class DefaultAudioFrame extends MinimalFrame {
 }
 
 
-export class FrameInterface {
-  constructor(stream,selfie = false,peerId=null,onLoadCB=null) {
+let FrameInterface {
+  init(stream,selfie = false,peerId=null,onLoadCB=null) {
     this.remoteId = peerId;
     this.slotIndex = null; //deprecated
 
@@ -296,7 +296,7 @@ export class FrameInterface {
 }
 
 
-export class AudioFrame extends FrameInterface {
+export class AudioFrame {
   constructor(stream, selfie = false, peerId=null) {
     this._frames = new DefaultAudioFrame();
 
@@ -308,7 +308,7 @@ export class AudioFrame extends FrameInterface {
       this.videoElement.play();
     }
 
-    super(stream,selfie,peerID, () => {
+    init(stream,selfie,peerID, () => {
 
       this.videoSprite = PIXI.Sprite.from(this._frames.SpeakerTexture);
       this.videoSprite.x =  this._frames.offsetVideo.x;
@@ -325,6 +325,7 @@ export class AudioFrame extends FrameInterface {
 
 }
 
+Object.assign(AudioFrame.prototype, FrameInterface);
 
 
 export class VideoFrame extends FrameInterface {
@@ -338,7 +339,7 @@ export class VideoFrame extends FrameInterface {
     this.videoElement.srcObject = this._stream;
     this.videoElement.play();
 
-    super(stream,selfie,peerID, () => {   
+    init(stream,selfie,peerID, () => {   
       if (this.selfie) {
         this.videoMuteButton = new PIXI.Sprite(this._frames.VideoIcon);
         this.videoMuteButton.interactive = true;
@@ -374,3 +375,5 @@ export class VideoFrame extends FrameInterface {
     // TODO
   }*/
 }
+
+Object.assign(VideoFrame.prototype, FrameInterface);
