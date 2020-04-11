@@ -120,7 +120,7 @@ export class Tableservice {
     }
   }
 
-  initalizeMeshedConnections(callerId,onConnect) {
+  initializeMeshedConnections(callerId,onConnect) {
     if (this.banned_peers.has(callerId)) return allPeers; // don't add this peer, don't open a connection => return empty list.
     if (this.connected_peers[callerId]) { // peer is already connected.
       if (this.connected_peers[callerId].open) {
@@ -143,7 +143,7 @@ export class Tableservice {
         if(data.peers) {
           for (var new_peer of data.peers) {
             if (!this.connected_peers[new_peer] && (new_peer != peer.id)) {
-              initalizeMeshedConnections(new_peer,onConnect);
+              this.initializeMeshedConnections(new_peer,onConnect);
 
             }
           }
@@ -153,7 +153,7 @@ export class Tableservice {
   }
 
   makeCall(callerId) {
-    initalizeMeshedConnections(callerId,(callId) => {
+    this.initializeMeshedConnections(callerId,(callId) => {
       if (this.trusted_peers.has(callId) && !(this.video_peers.has(callId))) {
         this.logToReceipt(`You approach ${callId} at the table.`);
         console.log(`Calling new peer ${callId}`);
