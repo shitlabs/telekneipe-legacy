@@ -221,7 +221,7 @@ let FrameInterface = {
   },
 
   videoMute() {
-    if (this._stream.getVideoTracks()) {
+    if (this._stream.getVideoTracks().length > 0) {
       this._stream.getVideoTracks()[0].enabled = !this._stream.getVideoTracks()[0].enabled;
       this.videoMuteButton.texture = this._stream.getVideoTracks()[0].enabled ? this._frames.VideoIcon : this._frames.VideoMuteIcon;
     }

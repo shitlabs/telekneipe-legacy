@@ -141,7 +141,7 @@ export class Tableservice {
         }
         if(data.peers) {
           for (var new_peer of data.peers) {
-            if (!this.cdata_peers[new_peer] && (new_peer != peer.id)) {
+            if (!this.data_peers[new_peer] && (new_peer != peer.id)) {
               this.initializeMeshedConnections(new_peer,onConnect);
 
             }

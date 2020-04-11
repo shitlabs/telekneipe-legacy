@@ -355,7 +355,7 @@ export class VideoKitchen {
 
 
       // check if stream contains video or audio only, then get new Instance for it.
-      let newFrame = stream.getVideoTracks()? new VideoFrame(stream,false,call.peer) : new AudioFrame(stream,false,call.peer);
+      let newFrame = (stream.getVideoTracks().length > 0) ? new VideoFrame(stream,false,call.peer) : new AudioFrame(stream,false,call.peer);
       newFrame.remoteId = call.peer;
 
       
