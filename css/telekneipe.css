@@ -31,7 +31,7 @@ h3 {
 }
 
 
-#step1-error, #step1 {
+#hwaccess-retry, #hwaccess-error, #hwaccess {
   display: none;
 }
 

@@ -8,11 +8,13 @@ export class Tableservice {
     this.logToReceipt = this.parent.logToReceipt;
     this.avclub = new VideoKitchen(this.logToReceipt);
     // PeerJS object
-    this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: 
+    this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: {
         iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
-    ]});
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
+          ]
+        }
+    });
 
     this.trusted_peers = new Set();
     this.banned_peers = new Set();
@@ -106,8 +108,8 @@ export class Tableservice {
       this.connected_peers[connection.peer] = undefined;
     });
     connection.on('data', () => {
-      this.handleData(connection)
-    }
+      this.handleData(connection);
+    });
   }
 
 

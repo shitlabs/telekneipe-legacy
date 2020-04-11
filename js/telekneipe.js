@@ -18,11 +18,12 @@ export class Telekneipe {
     
     if (readCookie("sF") && this.skipCookies) {
       createCookie("sF",readCookie("sF"),14);
-      if (parseInt(readCookie("nV"))) createCookie("nV",parseInt(readCookie("nV")+1,14);
+      if (parseInt(readCookie("nV"))) {
+        createCookie("nV",parseInt(readCookie("nV"))+1,14);
+      }
     }
 
-    this.lang = "de"
-    if (this.skipCookies && this.readCookie("en")) {
+    if (this.skipCookies && readCookie("en")) {
       this.lang = "en";
       createCookie("en","1",14);
     }
@@ -49,24 +50,34 @@ export class Telekneipe {
     createCookie("sF","0",14);
     createCookie("nV","1",14);
     if (window.location.pathname.includes("index_en.html")) {
-      table.lang = "en";
+      this.lang = "en";
       createCookie("en","1",14);
     }
   }
 
   clubMarke() {
-    if (this.skipCookies && readCookie("sF") != "1" && (parseInt(readCookie("nV"))) > 5) {
+    console.log("Test for ClubMarke");
+    if (this.skipCookies && readCookie("sF") != "1" && parseInt(readCookie("nV")) >= 5) {
+      console.log("User qualifies!")
+      let quest_callback = function(choice) {
+        console.log(this);
+        console.log(choice);
+        createCookie("sF",choice,14); 
+        hideModal(); 
+      };
+
       let quest_text = this.lang == "en" ? "It seems you're here quite often. Do you want to directly go to the barkeep on your next visits?" : "Scheint so als wärst du einer unserer Stammgäste. Möchtest du bei deinen nächsten Besuchen direkt zur Bar geleitet werden?";
-      let quest_choice_yes = $("<span class='fl'>").text(this.lang == "en" ? "Yes, please give me a Telekneipe Clubmarke" : "Ja, bitte gebt mir eine Telekneipe Clubmarke");
-      let quest_choice_no = $("<span class='fl'>").text(this.lang == "en" ? "No, I enjoy the experience (we will not ask again)" : "Nein, mir gefällt die Experience (wir fragen nicht noch mal)");
-      let quest_choice_next = $("<span class='fl'>").text(this.lang == "en" ? "Maybe next time" : "Vielleicht beim nächsten Mal");
-      let quest_callback = function(choice) {if (this.skipCookies) createCookie("sF",choice,14); hideModal(); };
+      let quest_choice_yes = $("<li class='fl'>").text(this.lang == "en" ? "Yes, please give me a Telekneipe Clubmarke" : "Ja, bitte gebt mir eine Telekneipe Clubmarke").click(quest_callback.bind(this,"2"));
+      let quest_choice_no = $("<li class='fl'>").text(this.lang == "en" ? "No, I enjoy the experience (we will not ask again)" : "Nein, mir gefällt die Experience (wir fragen nicht noch mal)").click(quest_callback.bind(this,"1"));
+      let quest_choice_next = $("<li class='fl'>").text(this.lang == "en" ? "Maybe next time" : "Vielleicht beim nächsten Mal").click(quest_callback.bind(this,"0"));
+
+
 
       prepareModal("Clubmarke",quest_text,false);
       let list = $("<ul />");
-      list.append($("<li />")).append(quest_choice_yes).click(quest_callback.bind(this,"2"));
-      list.append($("<li />")).append(quest_choice_no).click(quest_callback.bind(this,"0"));
-      list.append($("<li />")).append(quest_choice_maybe).click(quest_callback.bind(this,"1"));
+      list.append(quest_choice_yes);
+      list.append(quest_choice_no);
+      list.append(quest_choice_next);
       $('#modalBody').append(list);
     }
     showModal();    

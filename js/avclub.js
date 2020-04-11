@@ -399,6 +399,11 @@ export class VideoKitchen {
       }
       };
 
+    if (this.debugForceAudio) {
+      this.initMicOnlyStream();
+    }
+
+
     if (!this.localStream) {
       navigator.mediaDevices.getUserMedia(constraintsVideo)
       .then(stream => {
@@ -438,7 +443,7 @@ export class VideoKitchen {
         if (error.name == "NotFoundError" || error.name == "OverconstrainedError") {
           console.log("Could not get default device configuration, trying to get audio only");
           this.initMicOnlyStream();
-        } else if {error.name == "NotAllowedError"} {
+        } else if (error.name == "NotAllowedError") {
           console.log("Access not allowed. Ask user again");
           $("#hwaccess-retry").show();
         } else {
@@ -450,7 +455,7 @@ export class VideoKitchen {
   }
 
   initMicOnlyStream() {
-    const contraintsAudio = {
+    const constraintsAudio = {
       audio: {
         echoCancellation: true
       },
@@ -479,7 +484,7 @@ export class VideoKitchen {
         $("#hwaccess").hide();
       })
       .catch(error => {
-        if {error.name == "NotAllowedError"} {
+        if (error.name == "NotAllowedError") {
           console.log("Access not allowed. Ask user again");
           $("#hwaccess-retry").show();
         } else {

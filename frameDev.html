@@ -23,13 +23,13 @@
 
   <body>
     <!-- Beta Warning Modal -->
-    <div class="modal" id="betaWarning">
+    <div class="modal modal-warn-background" id="betaWarning">
       <div class="modal-content">
         <div class="modal-content-header">
           <span class="close" id="betaWarningButton">&times;</span>
-          <h3>Experimental Branch</h3>
+          <h3 id="modalHeader">Experimental Branch</h3>
         </div>
-        <div class="modal-content-body">
+        <div class="modal-content-body" id="modalBody">
           Dies ist die Developer Version der Telekneipe. Zur aktuellen Stabilen Version bitte auf <a href="https://www.telekneipe.de">www.telekneipe.de</a>
           <div id="modalWarning"></div>        
         </div>
@@ -102,6 +102,13 @@
               table = new Telekneipe();              
               table.registerUI();
               $.exposed = {table:table};
+              if (table.lang == "en" && window.location.pathname.includes("index.html")) {
+                window.location.replace("./index_en.html");
+              }
+              if (table.lang == "de" && window.location.pathname.includes("index_en.html")) {
+                window.location.replace("./index.html");
+              }
+
             } catch (err) {
               if (err.message.includes("WebGL unsupported")) {
                 $("#modalWarning").html("<p>Fehler: Dein Browser unterstützt kein WebGL. Leider ist die Telekneipe ohne WebGL zur Zeit nicht unterstützt.</p>");  
@@ -111,18 +118,15 @@
                 throw(err);
               }
             } finally {
-              if (table.lang == "en" && window.location.pathname.includes("index.html")) {
-                window.location.replace("./index_en.html");
-              }
-              if (table.lang == "de" && window.location.pathname.includes("index_en.html")) {
-                window.location.replace("./index.html");
-              }
-              if (table.skipFrequent) {
-                fab(meta["{{ frequent }}"])
-              } else if (table.skipCookies) {
-                fab(meta["{{ cookies }}"])
-              }
-              else {
+              if (table) {
+                if (table.skipFrequent) {
+                  fab(meta["{{ frequent }}"])
+                } else if (table.skipCookies) {
+                  fab(meta["{{ cookies }}"])
+                } else {
+                  fab(meta["{{ root }}"]);
+                }
+              } else {
                 fab(meta["{{ root }}"]);
               }
             }
@@ -130,7 +134,7 @@
             // temporarily display info after first screen
             $('#catch_events').on("tableservice.about", function() {
               if (table.skipCookies) {
-                table.ClubMarke()
+                table.clubMarke()
               } else {
                 $("#betaWarning").show();
               }

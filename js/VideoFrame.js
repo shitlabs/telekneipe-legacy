@@ -81,7 +81,7 @@ export class DefaultFrame extends MinimalFrame {
   }
 }
 
-export class AudioFrame extends MinimalFrame {
+export class DefaultAudioFrame extends MinimalFrame {
   constructor() {
     super();
     this._spriteSheet = "sprites/audioFrame.json";
@@ -298,7 +298,7 @@ export class FrameInterface {
 
 export class AudioFrame extends FrameInterface {
   constructor(stream, selfie = false, peerId=null) {
-    this._frames = new AudioFrame();
+    this._frames = new DefaultAudioFrame();
 
     // stream to sprite
     if (!selfie) {
