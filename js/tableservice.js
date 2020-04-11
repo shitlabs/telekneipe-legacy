@@ -19,7 +19,7 @@ export class Tableservice {
     this.trusted_peers = new Set();
     this.banned_peers = new Set();
     this.data_peers = {};
-    this.video_peers = {};
+    this.video_peers = new Set();
 
 
 
@@ -38,11 +38,11 @@ export class Tableservice {
       conn.on('open', () => {        
         this.parent.askConnection(conn,false,() => {
           this.trusted_peers.add(conn.peer)
-          this.connected_peers[conn.peer] = conn;
+          this.data_peers[conn.peer] = conn;
           this.logToReceipt(`${conn.peer} comes to you.`)
-          console.log("Sending connected_peers");
-          console.log(this.connected_peers);
-          conn.send({accept: true, peers: this.connected_peers});
+          console.log("Sending video_peers");
+          console.log([...this.video_peers]);
+          conn.send({accept: true, peers: [...this.video_peers]});
           this.handleData(connection);
         }, 
         () => {
@@ -51,7 +51,7 @@ export class Tableservice {
         });
       });
       conn.on('close', () => {
-        this.connected_peers[conn.peer] = undefined;
+        this.data_peers[conn.peer] = undefined;
       });
 
       
@@ -72,15 +72,14 @@ export class Tableservice {
       this.avclub.processCall(call);
 
       call.on("stream", () => {        
-        if (!this.connected_peers.includes(call.peer)) {
+        if (!this.video_peers.has(call.peer)) {
                   this.logToReceipt(`${call.peer} sat down at the table`);                  
-                  this.connected_peers.push(call.peer);
+                  this.video_peers.add(call.peer);
         }            
         
       });
       call.on("close", () => {
-        let index = this.connected_peers.indexOf(call.peer);
-        if (index>=0) { this.connected_peers.splice(index,1); }
+        this.video_peers.delete(call.peer); 
       });
 
     });
@@ -103,9 +102,9 @@ export class Tableservice {
   }
  
   handleNewConnection(connection) {
-    this.connected_peers[connection.peer] = connection;
+    this.data_peers[connection.peer] = connection;
     connection.on('close', () => {
-      this.connected_peers[connection.peer] = undefined;
+      this.data_peers[connection.peer] = undefined;
     });
     connection.on('data', () => {
       this.handleData(connection);
@@ -114,16 +113,16 @@ export class Tableservice {
 
 
   closeConnections() {
-    for (peerId in this.connected_peers) {
-      this.connected_peers[peerId].close();
-      this.connected_peers[peerId] = undefined;
+    for (peerId in this.data_peers) {
+      this.data_peers[peerId].close();
+      this.data_peers[peerId] = undefined;
     }
   }
 
   initializeMeshedConnections(callerId,onConnect) {
     if (this.banned_peers.has(callerId)) return allPeers; // don't add this peer, don't open a connection => return empty list.
-    if (this.connected_peers[callerId]) { // peer is already connected.
-      if (this.connected_peers[callerId].open) {
+    if (this.data_peers[callerId]) { // peer is already connected.
+      if (this.data_peers[callerId].open) {
         // should we try to get a refreshed list of peers if we have an open connection? For now I would say no.
         if (onConnect) onConnect(callerId);
       }
@@ -142,7 +141,7 @@ export class Tableservice {
         }
         if(data.peers) {
           for (var new_peer of data.peers) {
-            if (!this.connected_peers[new_peer] && (new_peer != peer.id)) {
+            if (!this.cdata_peers[new_peer] && (new_peer != peer.id)) {
               this.initializeMeshedConnections(new_peer,onConnect);
 
             }
