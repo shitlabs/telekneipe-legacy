@@ -60,7 +60,7 @@ export class DefaultFrame extends MinimalFrame {
       this.VideoMuteIcon = this.textures["video_mute.png"];
       callback();
     } else {
-      loader.add("sprites/basicFrame.json");
+      loader.add(this._spriteSheet);
       loader.load((loader,resources) => {
         this.textures = resources["sprites/basicFrame.json"].spritesheet.textures;
         this.FrameTexture = this.textures["image_frame.png"];
@@ -110,7 +110,7 @@ export class DefaultAudioFrame extends MinimalFrame {
       this.VideoMuteIcon = this.textures["video_mute.png"];
       callback();
     } else {
-      loader.add("sprites/basicFrame.json");
+      loader.add(this._spriteSheet);
       loader.load((loader,resources) => {
         this.textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
         this.SpeakerTexture = this.textures["speaker_inner.png"]
@@ -252,7 +252,7 @@ let FrameInterface = {
       this.videoElement.removeAttribute('srcObject');    
     }
   },
-  
+
 }
 
 
@@ -268,7 +268,7 @@ export class AudioFrame {
       this.videoElement.play();
     }
 
-    init(stream,selfie,peerID, () => {
+    this.init(stream,selfie,peerId, () => {
 
       this.videoSprite = PIXI.Sprite.from(this._frames.SpeakerTexture);
       this.videoSprite.x =  this._frames.offsetVideo.x;
@@ -288,7 +288,7 @@ export class AudioFrame {
 Object.assign(AudioFrame.prototype, FrameInterface);
 
 
-export class VideoFrame extends FrameInterface {
+export class VideoFrame {
   constructor(stream,selfie = false,peerId=null) {
     this._frames = new DefaultFrame();
 
@@ -299,7 +299,7 @@ export class VideoFrame extends FrameInterface {
     this.videoElement.srcObject = this._stream;
     this.videoElement.play();
 
-    init(stream,selfie,peerID, () => {   
+    this.init(stream,selfie,peerId, () => {   
       if (this.selfie) {
         this.videoMuteButton = new PIXI.Sprite(this._frames.VideoIcon);
         this.videoMuteButton.interactive = true;
