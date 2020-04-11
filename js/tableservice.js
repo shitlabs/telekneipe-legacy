@@ -8,7 +8,7 @@ export class Tableservice {
     this.logToReceipt = this.parent.logToReceipt;
     this.avclub = new VideoKitchen(this.logToReceipt);
     // PeerJS object
-    this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: {
+    this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:3, config: {
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
@@ -141,7 +141,7 @@ export class Tableservice {
         }
         if(data.peers) {
           for (var new_peer of data.peers) {
-            if (!this.data_peers[new_peer] && (new_peer != peer.id)) {
+            if (!this.data_peers[new_peer] && (new_peer != this.peer.id)) {
               this.initializeMeshedConnections(new_peer,onConnect);
 
             }
