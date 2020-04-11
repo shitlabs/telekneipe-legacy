@@ -37,12 +37,16 @@
     </div>
     <!-- TELEKNEIPE Modals -->    
     <div class="telekneipe_container">
-      <div id="step1">
+      <div id="hwaccess">
           <p>Please click `allow` on the top of the screen so we can access your webcam and microphone for transmission.</p>
-          <div id="step1-error">
+          <div id="hwaccess-retry">
             <p>Failed to access the webcam and microphone. </p>
-            <a href="#" class="pure-button pure-button-error" id="step1-retry">Try again</a>
+            <a href="#" class="pure-button pure-button-error" id="hwaccess-retry-button">Try again</a>
           </div>
+          <div id="hwaccess-error">
+            <h3>Unable to access your devices. Please check they are connected and not used otherwise, then reload this page.</h3>
+          </div>
+
       </div>
       <div id="call_pad">
         <h3>"Who are you looking for?"</h3>
@@ -93,9 +97,9 @@
 
 
         $(function() {
-            start_fabulation(meta)(meta["{{ root }}"]);
+            var fab = start_fabulation(meta);
             try {
-              table = new Tableservice();
+              table = new Tableservice();              
               table.registerUI();
               $.exposed = {table:table};
             } catch (err) {
@@ -106,10 +110,30 @@
                 $("#modalWarning").html(`<p>Warnung: Während der Initialisierung wurde ein unerwarteter Fehler festgestellt.</p><p>Fehlermeldung: ${err}</p>`);
                 throw(err);
               }
+            } finally {
+              if (table.lang == "en" && window.location.pathname.includes("index.html")) {
+                window.location.replace("./index_en.html");
+              }
+              if (table.lang == "de" && window.location.pathname.includes("index_en.html")) {
+                window.location.replace("./index.html");
+              }
+              if (table.skipFrequent) {
+                fab(meta["{{ frequent }}"])
+              } else if (table.skipCookies) {
+                fab(meta["{{ cookies }}"])
+              }
+              else {
+                fab(meta["{{ root }}"]);
+              }
             }
+
             // temporarily display info after first screen
             $('#catch_events').on("tableservice.about", function() {
-              $("#betaWarning").show();
+              if (table.skipCookies) {
+                table.ClubMarke()
+              } else {
+                $("#betaWarning").show();
+              }
             });            
             // info box functionality
             $("#betaWarningButton").click(function() {

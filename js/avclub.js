@@ -1,4 +1,4 @@
-import {VideoFrame,DefaultFrame} from './VideoFrame.js';
+import {VideoFrame,AudioFrame,DefaultFrame} from './VideoFrame.js';
 
 
 
@@ -189,9 +189,7 @@ export class VideoKitchen {
   cleanUpAvatar(call,instance) {
     if (instance != undefined) {
       this.app.stage.removeChild(instance.container);
-      instance.videoElement.pause();
-      instance.videoElement.muted = true;
-      instance.videoElement.removeAttribute('srcObject');
+      instance.unload();
     }
   }
 
@@ -356,9 +354,8 @@ export class VideoKitchen {
       }
 
 
-      
-      //let remotevideo,container;
-      let newFrame = new VideoFrame(stream,false,call.peer);
+      // check if stream contains video or audio only, then get new Instance for it.
+      let newFrame = stream.getVideoTracks()? new VideoFrame(stream,false,call.peer) : new AudioFrame(stream,false,call.peer);
       newFrame.remoteId = call.peer;
 
       
@@ -390,55 +387,107 @@ export class VideoKitchen {
 
   initWebcamStream () {
     // Get audio/video stream
-    const constraints = {
+    const constraintsVideo = {
       video: {
         facingMode: 'user',
         aspectRatio: { ideal: 1 },
-        height: { min: 240, ideal: 360, max: 360 },
+        height: { ideal: 360},
         //frameRate: { ideal: 15},
       },
       audio: {
-        echoCancellation: true}
+        echoCancellation: true
+      }
       };
 
-    navigator.mediaDevices.getUserMedia(constraints)
-    .then(stream => {
-      this.webcamvideo.srcObject = stream;
-      this.webcamvideo.play(); // TODO: Try without play for chrome's sake
+    if (!this.localStream) {
+      navigator.mediaDevices.getUserMedia(constraintsVideo)
+      .then(stream => {
+        this._hasVideo = true;
+        this.webcamvideo.srcObject = stream;
+        this.webcamvideo.play(); // TODO: Try without play for chrome's sake
 
-      // TODO: We need WebGl anyways for pixijs, so this is a bit pointless.
-      //if (!seriouslyFail && canvas.captureStream) {
-        // video effects are supported
-        this._seriously.go();
-        // mix streams for audio forwarding
-        this.localStream = this.webcamcanvas.captureStream();
-        this.localStream.addTrack(stream.getAudioTracks()[0]);
-      /*
-      } else {
-        // they are not, just capture webcam img. as fallback
-        localStream = stream;          
-      }*/
+        // TODO: We need WebGl anyways for pixijs, so this is a bit pointless.
+        //if (!seriouslyFail && canvas.captureStream) {
+          // video effects are supported
+          this._seriously.go();
+          // mix streams for audio forwarding
+          this.localStream = this.webcamcanvas.captureStream();
+          this.localStream.addTrack(stream.getAudioTracks()[0]);
+        /*
+        } else {
+          // they are not, just capture webcam img. as fallback
+          localStream = stream;          
+        }*/
 
-      // create loopback video element and sprite
-      this.localFrame = new VideoFrame(this.localStream,true);
-      this.localFrame.videoElement.muted = true;
-  
-      //sprite to canvas
-      this.localFrame.container.y = this.app.renderer.height-235;
-      this.localFrame.container.x = 0;
-
-
-      this.app.stage.addChild(this.localFrame.container);
-      this.rescale()
+        // create loopback video element and sprite
+        this.localFrame = new VideoFrame(this.localStream,true);
+        this.localFrame.videoElement.muted = true;
+    
+        //sprite to canvas
+        this.localFrame.container.y = this.app.renderer.height-235;
+        this.localFrame.container.x = 0;
 
 
-      $("#step1").hide();
-    })
-    .catch(error => {
-        console.error("Error accessing media devices.", error);
-        $("#step1-error").show();
-      });
+        this.app.stage.addChild(this.localFrame.container);
+        this.rescale()
 
+
+        $("#hwaccess").hide();
+      })
+      .catch(error => {
+        if (error.name == "NotFoundError" || error.name == "OverconstrainedError") {
+          console.log("Could not get default device configuration, trying to get audio only");
+          this.initMicOnlyStream();
+        } else if {error.name == "NotAllowedError"} {
+          console.log("Access not allowed. Ask user again");
+          $("#hwaccess-retry").show();
+        } else {
+          console.error("Unknown error accessing media devices.", error);
+          $("#hwaccess-error").show();
+        }
+        });
+    }
+  }
+
+  initMicOnlyStream() {
+    const contraintsAudio = {
+      audio: {
+        echoCancellation: true
+      },
+      video: false
+    };
+
+    if (!this.localStream) {
+      navigator.mediaDevices.getUserMedia(constraintsAudio)
+      .then(stream => {
+        this._hasVideo = false;
+
+        this.localStream = stream;
+
+        // create audio sprite
+        this.localFrame = new AudioFrame(this.localStream,true);
+    
+        //sprite to canvas
+        this.localFrame.container.y = this.app.renderer.height-235;
+        this.localFrame.container.x = 0;
+
+
+        this.app.stage.addChild(this.localFrame.container);
+        this.rescale()
+
+
+        $("#hwaccess").hide();
+      })
+      .catch(error => {
+        if {error.name == "NotAllowedError"} {
+          console.log("Access not allowed. Ask user again");
+          $("#hwaccess-retry").show();
+        } else {
+          console.error("Unknown error accessing media devices.", error);
+          $("#hwaccess-error").show();
+        }
+        });
+    }
   }
 
   closeCalls() {

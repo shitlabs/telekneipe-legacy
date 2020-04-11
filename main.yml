@@ -2,8 +2,41 @@
 root:
     fullpic: pics/dachterrasse.jpg
     content: "### TELEKNEIPE"
+    next: cookiesAsk
+    onExit: tableservice.about 
+
+cookiesAsk:
+    content: "Außerhalb von Raum und Zeit liegt dein Bewusstsein in einer warmen, primordialen Brühe von Nichts.
+
+
+            Garnichts ist und wird nie sein.
+
+
+            Da steigt aus deinem Rückenmark ein Gedanke zu deinem front-medialen Kortex:
+            ### Akzepteriere ich cookies?
+
+            - [Ja](exterior_cookies)
+            - [Nein](exterior)
+            - <a href=\"./index_en.html\">English please?</a>"
+
+
+exterior_cookies:
+    onEntrance: tableservice.acceptCookies
+    pic: pics/Eckkneipe_Kreuzung_anim96.gif
+    content: "In der ferner Zukunft, in einer postapokalyptischen Ruine einer Stadt stehst du an einer leeren Straßenkreuzung vor einem Gebäude. Das Ladengeschäft im Erdgeschoss ist überwachsen von Pflanzen und einige der großen Fensterflächen sind gebrochen und überklebt.
+
+         Du willst bereits weiter ziehen, da siehst du aus dem Augenwinkel, hinter einem der Fenster, eine Bewegung.
+
+
+         - [Näher treten](exterior2)"
+
+
+cookiesDont:
+    fullpic: pics/dachterrasse.jpg
+    content: "### TELEKNEIPE"
     next: exterior
-    onExit: tableservice.about    
+    onExit: tableservice.about 
+
 
 exterior:
     pic: pics/Eckkneipe_Kreuzung_anim96.gif
@@ -41,15 +74,22 @@ awareness:
 
 interior:
     pic: pics/Eckkneipe_innen.png
-    content: "Du betrittst den Raum einer Kneipe. Große Teile des Raums ist mit einer dicken Staubschicht belegt, aber an einigen Stellen siehst du Fußabdrücke, die frisch sein müssen. Große und kleinere, wie Pfoten. Ein hohes elektrisches Summen liegt in der Luft.
+    content: "Du betrittst den Raum einer Kneipe. Große Teile des Raums ist mit einer dicken Schicht von Staub und altem Rauch belegt, aber an einigen Stellen siehst du Fußabdrücke, die frisch sein müssen. Große und kleinere, wie Pfoten. Ein hohes elektrisches Summen liegt in der Luft.
 
         An der Seite befindet sich ein Tresen. Hinter der Tresen steht ein Barkeeper. Regungslos.
 
         - [An die Bar treten](counter)"
 
 counter:
-    onEntrance: tableservice.end
-    content: "Aus der Nähe erkennst du, dass es sich beim Barkeeper um einen Automaten handelt. Als du dich näherst hörst du wie das Summen lauter wird. Der Ton von schwingenden Zahnrädern erklingt.
+    content: "Aus der Nähe erkennst du, dass es sich beim Barkeeper um einen Automaten handelt. Eine groteske Figure mit einem schnabelförmigen Gebläse anstatt eines Mundes und einer Box voller Elektronik auf der Brust. Als du dich näherst hörst du wie das Summen lauter wird. Der Ton von schwingenden Zahnrädern erklingt und ein warmer, muffiger Luftstrom entweicht dem Gebläse.
+
+        Der Ton eines altertümlichen Nadeldruckers erklingt und aus einem Spalt im Tresen erscheint ein Stück Papier.
+
+        - [Papier abreissen](counter2)"
+
+counter2:
+    onEntrance: tableservice.receipt
+    content: "Auf dem Papier steht eine merkwürdige Buchstaben & Zahlenkombination. Auf einmal scheint Leben in den automatischen Barkeeper zu kommen und eine Stimme erklingt:
 
         ### Welcome to the Telebar. How may I help you?
         
@@ -62,18 +102,31 @@ table:
 
         sagt der Barkeeper, bewegt sich aber kein Stück. Im hinteren der Bar geht ein Spotlight an, es zeigt auf einen leeren Tisch.
 
-        Aus dem Treser erscheint ein Stück Papier.
+        - [An den Tisch setzen](table_sit)
 
-        - [Papier nehmen und an den Tisch setzen](table_sit)
-
-        - [...Warte!](BACK1)"
+        - [...Warte!](counter_late)"
 
 table_sit:
     onEntrance: tableservice.host
     onExit: tableservice.end
-    content: "- [Zurück zum Tresen](counter)"
+    content: "- [Zurück zum Tresen](counter_late)"
 
 call:
     onEntrance: tableservice.call
     onExit: tableservice.hide_call
-    content: "- [Zurück zum Tresen](BACK1)"
+    content: "- [Zurück zum Tresen](counter_late)"
+
+counter_late:
+    content: "### Welcome to the Telebar. How may I help you?
+        
+        - [Ich hätte gerne einen Tisch](table)
+
+        - [Ich suche wen...](call)"
+
+        - [Ciao!](exit)"
+
+
+exit:
+    onEntrance: tableservice.end
+    content: "### See you tomorrow
+                sagt der Automat. Du gehst."
