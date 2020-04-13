@@ -149,7 +149,7 @@ export class Telekneipe {
     // bind events triggered from fabulation
     // these should bubble up to the content-class div #catch_events
     $('#catch_events').on("tableservice.host", () => {
-      this.goInCallMode();
+      this.goInCallMode().catch(console.log);
     });
 
     $('#catch_events').on("tableservice.call", () => {

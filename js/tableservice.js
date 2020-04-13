@@ -46,9 +46,9 @@ export class Tableservice {
             this.logToReceipt(`${conn.peer} comes to you.`);
 
             console.log("Sending video_peers");
-            console.log(...this.video_peers.keys());
+            console.log([...this.video_peers.keys()]);
 
-            conn.send({accept: true, peers: ...this.video_peers.keys()});
+            conn.send({accept: true, peers: [...this.video_peers.keys()]});
 
             return this.handleData(conn);
         }).catch((error) => { 
