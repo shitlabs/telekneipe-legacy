@@ -22,7 +22,7 @@ export class Tableservice {
     this.trusted_peers = new Set();
     this.banned_peers = new Set();
     this.data_peers = {};
-    this.video_peers = new Set();
+    this.video_peers = {};
 
 
 
@@ -46,9 +46,9 @@ export class Tableservice {
             this.logToReceipt(`${conn.peer} comes to you.`);
 
             console.log("Sending video_peers");
-            console.log([...this.video_peers]);
+            console.log(this.video_peers.keys());
 
-            conn.send({accept: true, peers: [...this.video_peers]});
+            conn.send({accept: true, peers: this.video_peers.keys()});
 
             return this.handleData(conn);
         }).catch((error) => { 
@@ -96,16 +96,20 @@ export class Tableservice {
     this.avclub.processCall(call);
 
     call.on("stream", () => {        
-      if (!this.video_peers.has(call.peer)) {
+      if (!this.video_peers[call.peer]) {
                 this.logToReceipt(`${call.peer} sat down at the table`);                  
-                this.video_peers.add(call.peer);
+                this.video_peers[call.peer] = call;
       }            
       
     });
     call.on("close", () => {
-      this.video_peers.delete(call.peer); 
+      this.video_peers[call.peer] = undefined; 
     });
 
+  }
+
+  closeCall(callid) {
+    if(this.video_peers[callid]) this.video_peers[callid].close();
   }
 
   sendNote(note,peerId) {
@@ -113,7 +117,7 @@ export class Tableservice {
     if (peerId) {
       recipiands.push(...peerId);
     } else {
-      recipiands.push(...this.video_peers);
+      recipiands.push(...this.video_peers.keys());
     }
     for (recipiand of recipiands) {
       if (this.data_peers[recipiand] && this.data_peers[recipiand].open) {
@@ -183,7 +187,7 @@ export class Tableservice {
 
   makeCall(callerId) {
     this.initializeMeshedConnections(callerId,(callId) => {
-      if (this.trusted_peers.has(callId) && !(this.video_peers.has(callId))) {
+      if (this.trusted_peers.has(callId) && !(this.video_peers[callId])) {
         this.logToReceipt(`You approach ${callId} at the table.`);
         console.log(`Calling new peer ${callId}`);
         let call = this.peer.call(callId, this.avclub.localStream);
@@ -194,12 +198,12 @@ export class Tableservice {
         this.avclub.processCall(call);
 
         call.on("stream", () => {
-          if (!this.video_peers.has(call.peer)) {
-            this.video_peers.add(call.peer);
+          if (!this.video_peers[call.peer]) {
+            this.video_peers[call.peer] = call;
           }          
         });
         call.on("close", () => {
-          this.video_peers.delete(call.peer);
+          this.video_peers[call.peer] = undefined;
         });
       }
     });

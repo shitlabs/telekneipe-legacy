@@ -535,7 +535,7 @@ export class VideoKitchen {
       for (let [key, value] of this.existingCalls) {
         this.cleanUpAvatar(key,value);
         // end call
-        key.close();
+        this.parent.closeCall(key);
         // remove element
         this.existingCalls.delete(key);
       }
