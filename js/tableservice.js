@@ -50,7 +50,7 @@ export class Tableservice {
 
             conn.send({accept: true, peers: [...this.video_peers]});
 
-            return this.handleData(connection);
+            return this.handleData(conn);
         }).catch((error) => { 
           console.log("Connection rejected")
           console.log(error);
