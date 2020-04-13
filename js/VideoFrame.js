@@ -141,75 +141,77 @@ export class DefaultAudioFrame extends MinimalFrame {
 
 
 let FrameInterface = {
-  init(stream,selfie = false,peerId=null,onLoadCB=null) {
-    this.remoteId = peerId;
-    this.slotIndex = null; //deprecated
+  init(stream,selfie = false,peerId=null) {
+    return new Promise((resolve,reject) => {
+      this.remoteId = peerId;
+      this.slotIndex = null; //deprecated
 
-    this.selfie = selfie;
+      this.selfie = selfie;
 
-    this._stream = stream;
+      this._stream = stream;
 
-    this.container = new PIXI.Container();
+      this.container = new PIXI.Container();
 
-    this._frames.textures.then(() => {
+      this._frames.textures.then(() => {
 
-      this.frame = new PIXI.Sprite(this._frames.FrameTexture);
-      this.frame.x = this._frames.offsetFrame.x;
-      this.frame.y = this._frames.offsetFrame.y;
-      this.frame.zIndex = 10;
+        this.frame = new PIXI.Sprite(this._frames.FrameTexture);
+        this.frame.x = this._frames.offsetFrame.x;
+        this.frame.y = this._frames.offsetFrame.y;
+        this.frame.zIndex = 10;
 
 
+        
+
+
+        this.backsideContainer = new PIXI.Container();
+
+        this.overlaySprite = new PIXI.Sprite(this._frames.FrameTexture_filled);
+        this.overlaySprite.x = this._frames.offsetFrame.x;
+        this.overlaySprite.y = this._frames.offsetFrame.y;
+
+        this.backsideContainer.addChild(this.overlaySprite);
+
+        this.muteButton = new PIXI.Sprite(this._frames.FrameVolIcon);
+        this.muteButton.interactive = true;
+        this.muteButton.buttonMode = true;
+        this.muteButton.x = this._frames.offsetMute.x;
+        this.muteButton.y = this._frames.offsetMute.y;
+        this.muteButton.on("pointerdown",this.toggleMute.bind(this));
+
+        if (this.remoteId) {
+            this.textId = new PIXI.Text(this.remoteId.replace(/-/g, "- "), smallBitFont);
+            this.textId.x = this._frames.offsetIdText.x;
+            this.textId.y = this._frames.offsetIdText.y;
+            this.backsideContainer.addChild(this.textId);
+        }
+
+
+        this.backsideContainer.addChild(this.muteButton); // add late to keep in front.
+
+
+        this.backsideContainer.visible = false;
+        this.backsideContainer.zIndex = 30;
+
+        this.container.addChild(this.frame);
+
+        this.container.addChild(this.backsideContainer);
+
+
+        this.container.sortChildren();
+
+
+        // event registration
+        this.container.interactive = true;
+        this.container.on('pointerover', this._showBack.bind(this))
+          .on('pointerout', this._hideBack.bind(this));
+
+        
+        resolve();
+      }).catch((error) => {reject(error)};
+
+
+      this._internalVolume = 100;
       
-
-
-      this.backsideContainer = new PIXI.Container();
-
-      this.overlaySprite = new PIXI.Sprite(this._frames.FrameTexture_filled);
-      this.overlaySprite.x = this._frames.offsetFrame.x;
-      this.overlaySprite.y = this._frames.offsetFrame.y;
-
-      this.backsideContainer.addChild(this.overlaySprite);
-
-      this.muteButton = new PIXI.Sprite(this._frames.FrameVolIcon);
-      this.muteButton.interactive = true;
-      this.muteButton.buttonMode = true;
-      this.muteButton.x = this._frames.offsetMute.x;
-      this.muteButton.y = this._frames.offsetMute.y;
-      this.muteButton.on("pointerdown",this.toggleMute.bind(this));
-
-      if (this.remoteId) {
-          this.textId = new PIXI.Text(this.remoteId.replace(/-/g, "- "), smallBitFont);
-          this.textId.x = this._frames.offsetIdText.x;
-          this.textId.y = this._frames.offsetIdText.y;
-          this.backsideContainer.addChild(this.textId);
-      }
-
-
-      this.backsideContainer.addChild(this.muteButton); // add late to keep in front.
-
-
-      this.backsideContainer.visible = false;
-      this.backsideContainer.zIndex = 30;
-
-      this.container.addChild(this.frame);
-
-      this.container.addChild(this.backsideContainer);
-
-
-      this.container.sortChildren();
-
-
-      // event registration
-      this.container.interactive = true;
-      this.container.on('pointerover', this._showBack.bind(this))
-        .on('pointerout', this._hideBack.bind(this));
-
-      // chain onLoad function from childs
-      if(onLoadCB) onLoadCB();
-    }).catch(console.log.bind(console));
-
-
-    this._internalVolume = 100;
   },
 
   _showBack() {
@@ -281,7 +283,7 @@ export class AudioFrame {
       this.videoElement.play();
     }
 
-    this.init(stream,selfie,peerId, () => {
+    this.init(stream,selfie,peerId).then(() => {
 
       this.videoSprite = PIXI.Sprite.from(this._frames.SpeakerTexture);
       this.videoSprite.x =  this._frames.offsetVideo.x;
@@ -312,7 +314,7 @@ export class VideoFrame {
     this.videoElement.srcObject = stream;
     this.videoElement.play();
 
-    this.init(stream,selfie,peerId, () => {   
+    this.init(stream,selfie,peerId).then(() => {   
       if (this.selfie) {
         this.videoMuteButton = new PIXI.Sprite(this._frames.VideoIcon);
         this.videoMuteButton.interactive = true;
