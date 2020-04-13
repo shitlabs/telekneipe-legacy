@@ -22,7 +22,7 @@ export class Tableservice {
     this.trusted_peers = new Set();
     this.banned_peers = new Set();
     this.data_peers = {};
-    this.video_peers = {};
+    this.video_peers = new Map();
 
 
 
@@ -44,15 +44,11 @@ export class Tableservice {
             this.trusted_peers.add(conn.peer);
             this.data_peers[conn.peer] = conn;
             this.logToReceipt(`${conn.peer} comes to you.`);
-            if (this.video_peers) {
-              console.log("Sending video_peers");
-              console.log(this.video_peers.keys());
 
-              conn.send({accept: true, peers: this.video_peers.keys()});
-            } else {
-              console.log("Accepting Connection");
-              conn.send({æccept: true, peers: []})
-            }
+            console.log("Sending video_peers");
+            console.log(...this.video_peers.keys());
+
+            conn.send({accept: true, peers: ...this.video_peers.keys()});
 
             return this.handleData(conn);
         }).catch((error) => { 
@@ -100,27 +96,27 @@ export class Tableservice {
     this.avclub.processCall(call);
 
     call.on("stream", () => {        
-      if (!this.video_peers[call.peer]) {
+      if (!this.video_peers.has(call.peer)) {
                 this.logToReceipt(`${call.peer} sat down at the table`);                  
-                this.video_peers[call.peer] = call;
+                this.video_peers.set(call.peer,call);
       }            
       
     });
     call.on("close", () => {
-      this.video_peers[call.peer] = undefined; 
+      this.video_peers.delete(call.peer); 
     });
 
   }
 
   closeCall(callid) {
-    if(this.video_peers[callid]) this.video_peers[callid].close();
+    if(this.video_peers.has(callid)) this.video_peers.get(callid).close();
   }
 
   sendNote(note,peerId) {
     let recipiands = [];
     if (peerId) {
       recipiands.push(...peerId);
-    } else if (this.video_peers) {
+    } else if (this.video_peers.size) {
       recipiands.push(...this.video_peers.keys());
     }
     for (recipiand of recipiands) {
@@ -191,7 +187,7 @@ export class Tableservice {
 
   makeCall(callerId) {
     this.initializeMeshedConnections(callerId,(callId) => {
-      if (this.trusted_peers.has(callId) && !(this.video_peers[callId])) {
+      if (this.trusted_peers.has(callId) && !(this.video_peers.has(callId))) {
         this.logToReceipt(`You approach ${callId} at the table.`);
         console.log(`Calling new peer ${callId}`);
         let call = this.peer.call(callId, this.avclub.localStream);
@@ -202,12 +198,12 @@ export class Tableservice {
         this.avclub.processCall(call);
 
         call.on("stream", () => {
-          if (!this.video_peers[call.peer]) {
-            this.video_peers[call.peer] = call;
+          if (!this.video_peers.has(call.peer)) {
+            this.video_peers.set(call.peer,call);
           }          
         });
         call.on("close", () => {
-          this.video_peers[call.peer] = undefined;
+          this.video_peers.delete(call.peer);
         });
       }
     });
