@@ -26,61 +26,66 @@ export class MinimalFrame {
 
   }
 
-  static preLoad() {    
-  }
+
 }
 
 
 // one could discuss the option to make these singletons, but I would hope the resource loader only loads resources once.
 export class DefaultFrame extends MinimalFrame {
   constructor() {
-    super();
-    this._spriteSheet = "sprites/basicFrame.json";
-    this.loaded = false;
-    this.offsetVideo = {x: 27, y: 27};
-    this.offsetFrame = {x: 0, y:0}
-    this.offsetMute = {x: 170, y:45};
-    this.offsetVideoMute = {x:45, y:45};
-    this.offsetIdText = {x:120,y:120};
+    if (!DefaultFrame.instance) {
+      super();
+      this._spriteSheet = "sprites/basicFrame.json";
+      this.loaded = false;
+      this.offsetVideo = {x: 27, y: 27};
+      this.offsetFrame = {x: 0, y:0}
+      this.offsetMute = {x: 170, y:45};
+      this.offsetVideoMute = {x:45, y:45};
+      this.offsetIdText = {x:120,y:120};
 
-    this.videoTint = 0xe0b888;
+      this.videoTint = 0xe0b888;
+
+      this.textures = new Promise((resolve,reject)=>{this.loadTextures()});
+
+      DefaultFrame.instance = this;
+
+    }    
+    return DefaultFrame.instance;
   }
 
-  loadTextures(callback) {    
+  loadTextures(resolve,reject) {    
     let loader = PIXI.Loader.shared;
 
     if (loader.resources[this._spriteSheet]) {
       //FIXME: Bad code duplication.
-      this.textures = loader.resources[this._spriteSheet].spritesheet.textures;
-      this.FrameTexture = this.textures["image_frame.png"];
-      this.FrameTexture_filled = this.textures["image_frame_filled.png"];
-      this.FrameVolIcon = this.textures["volume.png"];
-      this.FrameMuteIcon = this.textures["volume_mute.png"];
-      this.VideoIcon = this.textures["video.png"];
-      this.VideoMuteIcon = this.textures["video_mute.png"];
-      callback();
+      let textures = loader.resources[this._spriteSheet].spritesheet.textures
+      this.FrameTexture = textures["image_frame.png"];
+      this.FrameTexture_filled = textures["image_frame_filled.png"];
+      this.FrameVolIcon = textures["volume.png"];
+      this.FrameMuteIcon = textures["volume_mute.png"];
+      this.VideoIcon = textures["video.png"];
+      this.VideoMuteIcon = textures["video_mute.png"];
+      resolve(textures);
     } else {
       loader.add(this._spriteSheet);
       loader.load((loader,resources) => {
-        this.textures = resources[this._spriteSheet].spritesheet.textures;
-        this.FrameTexture = this.textures["image_frame.png"];
-        this.FrameTexture_filled = this.textures["image_frame_filled.png"];
-        this.FrameVolIcon = this.textures["volume.png"];
-        this.FrameMuteIcon = this.textures["volume_mute.png"];
-        this.VideoIcon = this.textures["video.png"];
-        this.VideoMuteIcon = this.textures["video_mute.png"];
-        callback();
+        let textures = resources[this._spriteSheet].spritesheet.textures;
+        this.FrameTexture = textures["image_frame.png"];
+        this.FrameTexture_filled = textures["image_frame_filled.png"];
+        this.FrameVolIcon = textures["volume.png"];
+        this.FrameMuteIcon = textures["volume_mute.png"];
+        this.VideoIcon = textures["video.png"];
+        this.VideoMuteIcon = textures["video_mute.png"];
+        resolve(textures);
       });
     }
   }
 
-  static preLoad() {
-    let loader = PIXI.Loader.shared;
-    loader.add("sprites/basicFrame.json");
-    loader.load();
-  }
+
 }
 
+
+// FIXME: Implement singleton and promise based loader for this class
 export class DefaultAudioFrame extends MinimalFrame {
   constructor() {
     super();
@@ -95,7 +100,7 @@ export class DefaultAudioFrame extends MinimalFrame {
     this.videoTint = 0xffffff;
   }
 
-  loadTextures(callback) {    
+  loadTextures(callback) {
     let loader = PIXI.Loader.shared;
 
     if (loader.resources[this._spriteSheet]) {
@@ -138,7 +143,7 @@ let FrameInterface = {
 
     this.container = new PIXI.Container();
 
-    this._frames.loadTextures(() => {
+    this._frames.textures().then(() => {
 
       this.frame = new PIXI.Sprite(this._frames.FrameTexture);
       this.frame.x = this._frames.offsetFrame.x;
@@ -193,7 +198,7 @@ let FrameInterface = {
 
       // chain onLoad function from childs
       if(onLoadCB) onLoadCB();
-    });
+    }).catch(console.log.bind(console));
 
 
     this._internalVolume = 100;
