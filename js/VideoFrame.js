@@ -207,12 +207,12 @@ let FrameInterface = {
 
         
         resolve();
-      }).catch((error) => {reject(error)};
+      }).catch((error) => {reject(error)});
 
 
       this._internalVolume = 100;
       
-  },
+  })},
 
   _showBack() {
     this.backsideContainer.visible = true;

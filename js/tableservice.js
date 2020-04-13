@@ -51,8 +51,9 @@ export class Tableservice {
             conn.send({accept: true, peers: [...this.video_peers]});
 
             return this.handleData(connection);
-        }).catch(() => { 
-          console.log("Connection rejected");
+        }).catch((error) => { 
+          console.log("Connection rejected")
+          console.log(error);
           this.banned_peers.add(conn.peer);
         });
       });
@@ -65,13 +66,17 @@ export class Tableservice {
 
     // Receiving a call
     this.peer.on('call', (call) => {
-      // Answer the call automatically (instead of prompting user) for demo purposes
-      if (!this.parent.getInCallMode() || !this.avclub.localStream) {
-        this.parent.askStream(call,false)
-        .then(() => this.parent.goInCallMode())
-        .then((stream) => {this.answerCall(call,stream)}); 
+      if (this.trusted_peers.has(call.peer)) {
+        // Answer the call automatically (instead of prompting user) for demo purposes
+        if (!this.parent.getInCallMode() || !this.avclub.localStream) {
+          this.parent.askStream(call,false)
+          .then(() => this.parent.goInCallMode())
+          .then((stream) => {this.answerCall(call,stream)}); 
+        } else {
+          this.answerCall(call);
+        }
       } else {
-        this.answerCall(call);
+        console.log("Ignored Call from untrusted peer");
       }
     });
 
