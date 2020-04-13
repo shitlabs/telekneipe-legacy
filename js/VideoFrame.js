@@ -45,7 +45,7 @@ export class DefaultFrame extends MinimalFrame {
 
       this.videoTint = 0xe0b888;
 
-      this.textures = new Promise((resolve,reject)=>{this.loadTextures()});
+      this.textures = new Promise((resolve,reject)=>{this.loadTextures(resolve,reject)});
 
       DefaultFrame.instance = this;
 
@@ -88,44 +88,52 @@ export class DefaultFrame extends MinimalFrame {
 // FIXME: Implement singleton and promise based loader for this class
 export class DefaultAudioFrame extends MinimalFrame {
   constructor() {
-    super();
-    this._spriteSheet = "sprites/audioFrame.json";
-    this.loaded = false;
-    this.offsetVideo = {x: 10, y: 10};
-    this.offsetFrame = {x: 0, y:0}
-    this.offsetMute = {x: 66, y:45};
-    this.offsetVideoMute = {x:0, y:0};
-    this.offsetIdText = {x:20,y:80};
+    if (!DefaultAudioFrame.instance) {
+      super();
+      this._spriteSheet = "sprites/audioFrame.json";
+      this.loaded = false;
+      this.offsetVideo = {x: 10, y: 10};
+      this.offsetFrame = {x: 0, y:0}
+      this.offsetMute = {x: 66, y:45};
+      this.offsetVideoMute = {x:0, y:0};
+      this.offsetIdText = {x:20,y:80};
 
-    this.videoTint = 0xffffff;
+      this.videoTint = 0xffffff;
+
+      this.textures = new Promise((resolve,reject)=>{this.loadTextures(resolve,reject)});
+
+      DefaultAudioFrame.instance = this;
+    }
+
+    return DefaultAudioFrame.instance;
   }
 
-  loadTextures(callback) {
+  loadTextures(resole,reject) {
     let loader = PIXI.Loader.shared;
 
     if (loader.resources[this._spriteSheet]) {
       //FIXME: Bad code duplication.
-      this.textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
-      this.SpeakerTexture = this.textures["speaker_inner.png"]
-      this.FrameTexture = this.textures["speaker_frame.png"];
-      this.FrameTexture_filled = this.textures["speaker_frame_filled.png"];
-      this.FrameVolIcon = this.textures["volume.png"];
-      this.FrameMuteIcon = this.textures["volume_mute.png"];
-      this.VideoIcon = this.textures["video.png"];
-      this.VideoMuteIcon = this.textures["video_mute.png"];
-      callback();
+      let textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
+      this.SpeakerTexture = textures["speaker_inner.png"]
+      this.FrameTexture = textures["speaker_frame.png"];
+      this.FrameTexture_filled = textures["speaker_frame_filled.png"];
+      this.FrameVolIcon = textures["volume.png"];
+      this.FrameMuteIcon = textures["volume_mute.png"];
+      this.VideoIcon = textures["video.png"];
+      this.VideoMuteIcon = textures["video_mute.png"];
+      resolve(textures);
     } else {
       loader.add(this._spriteSheet);
       loader.load((loader,resources) => {
-        this.textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
-        this.SpeakerTexture = this.textures["speaker_inner.png"]
-        this.FrameTexture = this.textures["speaker_frame.png"];
-        this.FrameTexture_filled = this.textures["speaker_frame_filled.png"];
-        this.FrameVolIcon = this.textures["volume.png"];
-        this.FrameMuteIcon = this.textures["volume_mute.png"];
-        this.VideoIcon = this.textures["video.png"];
-        this.VideoMuteIcon = this.textures["video_mute.png"];
-        callback();
+        let textures = loader.resources["sprites/audioFrame.json"].spritesheet.textures;
+        this.SpeakerTexture = textures["speaker_inner.png"]
+        this.FrameTexture = textures["speaker_frame.png"];
+        this.FrameTexture_filled = textures["speaker_frame_filled.png"];
+        this.FrameVolIcon = textures["volume.png"];
+        this.FrameMuteIcon = textures["volume_mute.png"];
+        this.VideoIcon = textures["video.png"];
+        this.VideoMuteIcon = textures["video_mute.png"];
+        resolve(textures);
       });
     }
   }
@@ -143,7 +151,7 @@ let FrameInterface = {
 
     this.container = new PIXI.Container();
 
-    this._frames.textures().then(() => {
+    this._frames.textures.then(() => {
 
       this.frame = new PIXI.Sprite(this._frames.FrameTexture);
       this.frame.x = this._frames.offsetFrame.x;

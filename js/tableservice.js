@@ -11,8 +11,8 @@ export class Tableservice {
     // PeerJS object
     this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: {
         iceServers: [
-        {urls: "stun:www.telekneipe.de:49180"},
-        //{urls: "turn:www.telekneipe.de:49180", username: "telekneipe", credential: "cS&Y7aTf!tl$"},
+        //{urls: "stun:www.telekneipe.de:49180"},
+        {urls: "turn:www.telekneipe.de:49180", username: "telekneipe", credential: "cS&Y7aTf!tl$"},
          /* { urls: "stun:stun.l.google.com:19302" },
           { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }*/
           ]
