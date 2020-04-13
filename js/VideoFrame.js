@@ -51,7 +51,7 @@ export class DefaultFrame extends MinimalFrame {
 
     if (loader.resources[this._spriteSheet]) {
       //FIXME: Bad code duplication.
-      this.textures = loader.resources["sprites/basicFrame.json"].spritesheet.textures;
+      this.textures = loader.resources[this._spriteSheet].spritesheet.textures;
       this.FrameTexture = this.textures["image_frame.png"];
       this.FrameTexture_filled = this.textures["image_frame_filled.png"];
       this.FrameVolIcon = this.textures["volume.png"];
@@ -62,7 +62,7 @@ export class DefaultFrame extends MinimalFrame {
     } else {
       loader.add(this._spriteSheet);
       loader.load((loader,resources) => {
-        this.textures = resources["sprites/basicFrame.json"].spritesheet.textures;
+        this.textures = resources[this._spriteSheet].spritesheet.textures;
         this.FrameTexture = this.textures["image_frame.png"];
         this.FrameTexture_filled = this.textures["image_frame_filled.png"];
         this.FrameVolIcon = this.textures["volume.png"];
