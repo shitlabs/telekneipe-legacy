@@ -68,7 +68,7 @@ export class Tableservice {
       // Answer the call automatically (instead of prompting user) for demo purposes
       if (!this.parent.getInCallMode() || !this.avclub.localStream) {
         this.parent.askStream(call,false)
-        .then(this.parent.goInCallMode)
+        .then(() => this.parent.goInCallMode())
         .then((stream) => {this.answerCall(call,stream)}); 
       }
       this.answerCall(call);

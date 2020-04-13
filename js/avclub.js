@@ -422,7 +422,7 @@ export class VideoKitchen {
             this._seriously.go();
             // mix streams for audio forwarding
             this.localStream = this.webcamcanvas.captureStream();
-            for (track of stream.getAudioTracks()) {
+            for (var track of stream.getAudioTracks()) {
               this.localStream.addTrack(track);
             }
           /*
@@ -492,7 +492,7 @@ export class VideoKitchen {
           }                   
 
           this.localStream = black();
-          for (track of stream.getAudioTracks()) {
+          for (var track of stream.getAudioTracks()) {
             this.localStream.addTrack(track);
           }        
 

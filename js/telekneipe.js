@@ -31,7 +31,7 @@ export class Telekneipe {
 
   askConnection(connection,alwaysAsk=false) {
     // TODO
-    Promise.resolve();
+    return Promise.resolve();
   }
 
   askStream(call,alwaysAsk=false) {
