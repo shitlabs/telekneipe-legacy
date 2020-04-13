@@ -8,9 +8,9 @@ const _VERSION = 0.1;
 
 export class Telekneipe {
   constructor() {
-
-    this.service = new Tableservice(this);
+    this.service = new Tableservice();
     this.avclub = this.service.avclub;
+
 
     // try to read cookies
     this.skipCookies = readCookie("aC")>= _MIN_VERSION ? createCookie("aC",readCookie("aC"),14) : false;
@@ -29,9 +29,25 @@ export class Telekneipe {
     }
   }
 
-  askConnection(connection,alwaysAsk=false,cbAccept,cbDenied) {
+  askConnection(connection,alwaysAsk=false) {
     // TODO
-    cbAccept();
+    Promise.resolve();
+  }
+
+  askStream(call,alwaysAsk=false) {
+    return new Promise((resolve,reject) => {
+      let quest_text = this.lang == "en" ? "It is as someone tapped you on the shoulder, but when you turn there is nobody there. In the room next to the bar a light starts flickering. The robot asks: " : "Du denkst jemand hätte dir auf die Schulter geklopft, aber als du dich umdrehst ist da niemand. Im Raum neben dem Tresen beginnt ein Licht zu flickern. Der Barkeeper fragt:";
+      prepareModal("A Tap On Your Shoulder...",quest_text,false);
+      let speech = $("<h3>").text(`Would you like to sit down with ${call.peer}`);
+      let quest_choice_yes = $("<li class='fl'>").text(this.lang == "en" ? "Yes" : "Ja").click(() =>{hideModal(); resolve()});
+      let quest_choice_no = $("<li class='fl'>").text(this.lang == "en" ? "No" : "Nein").click(() =>{hideModal(); reject()});
+
+      let options = $("<ul>");
+      options.append(quest_choice_yes).append(quest_choice_no);
+      $('#modalBody').append(speech).append(options);
+
+      showModal(reject);
+    });
   }
 
   logToReceipt(msg) {
@@ -40,6 +56,10 @@ export class Telekneipe {
     $("#receiptButton").fadeOut("fast",function() {$("#receiptButton").fadeIn(); });
   }
 
+  logNote(identifier, msg) {
+    $("#console").append("div").addClass("msg").text(`You got a message from ${identifier}:`);
+    $("#console").append("div").addClass("msg").text(msg);
+  }
 
   showReceipt() {
     $(".receipt").show();
@@ -56,12 +76,8 @@ export class Telekneipe {
   }
 
   clubMarke() {
-    console.log("Test for ClubMarke");
     if (this.skipCookies && readCookie("sF") != "1" && parseInt(readCookie("nV")) >= 5) {
-      console.log("User qualifies!")
       let quest_callback = function(choice) {
-        console.log(this);
-        console.log(choice);
         createCookie("sF",choice,14); 
         hideModal(); 
       };
@@ -83,6 +99,30 @@ export class Telekneipe {
     showModal();    
   }
 
+  getInCallMode() {
+    return $('#table_container').is(":visible");
+  }
+
+  goInCallMode() {
+    return new Promise((resolve,reject) => {
+      if (!this.avclub.localStream) {
+        $("#hwaccess").show()
+        this.avclub.initWebcamStream()
+          .then((stream) => {resolve(stream);})
+          .catch((error)=>{reject(error)});
+      }
+      // display our scene      
+      $('#table_container').show();
+      // hide fabulation
+    });
+  }
+
+  leaveInCallMode() {
+    // hide scene
+    $('#table_container').hide();
+    // display fabulation
+  }
+
 
   prepareCall(callerId) {
     // display our scene
@@ -102,27 +142,14 @@ export class Telekneipe {
     // Register UI events.
 
     $('#make-call').click(() => {
-      this.prepareCall($('#callto-id').val());
+      this.prepareCall($('#callto-id').val().toLowerCase());
     });
 
-    // Retry if getUserMedia fails
-    $('#hwaccess-retry-button').click(() => {
-      $('#hwaccess-retry').hide();
-      this.avclub.initWebcamStream();
-    });
 
     // bind events triggered from fabulation
     // these should bubble up to the content-class div #catch_events
     $('#catch_events').on("tableservice.host", () => {
-      if (!this.avclub.localStream) {
-        $("#hwaccess").show()
-        this.avclub.initWebcamStream();
-      }
-      this.showReceipt();
-      // display our scene      
-      $('#table_container').show();
-      // maybe set text so that it's clear what the table's name is?
-
+      this.goInCallMode();
     });
 
     $('#catch_events').on("tableservice.call", () => {
@@ -130,7 +157,6 @@ export class Telekneipe {
         $("#hwaccess").show()        
         this.avclub.initWebcamStream();
       }
-      this.showReceipt();
       // display the call screen
       $('#call_pad').show();
 

@@ -130,7 +130,7 @@ function start_fabulation(meta)
             unbind_src : function(event, src)
             {
                 event.preventDefault()
-                $("body").unbind('click')
+                $("#catch_events").unbind('click')
                 $(document).unbind('keypress')
 
                 if("links" in src)
@@ -181,12 +181,12 @@ function start_fabulation(meta)
 
                     if( "nxt" in tgt )
                     {
-                        $("body").click( this.get_click_to_tgt( tgt, meta[tgt.nxt] ) )
+                        $("#catch_events").click( this.get_click_to_tgt( tgt, meta[tgt.nxt] ) )
                         $(document).keypress( this.get_click_to_tgt( tgt, meta[tgt.nxt] ) )
                     }
                     else if( "bnxt" in tgt )
                     {
-                        $("body").click( this.get_click_back( tgt, tgt.bnxt ) )
+                        $("#catch_events").click( this.get_click_back( tgt, tgt.bnxt ) )
                         $(document).keypress( this.get_click_back( tgt, tgt.bnxt ) )
                     }
 

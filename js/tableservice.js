@@ -1,14 +1,13 @@
 import {VideoKitchen} from './avclub.js';
 
-
-
 export class Tableservice {
   constructor(parent) {
     this.parent = parent;
     this.logToReceipt = this.parent.logToReceipt;
     this.avclub = new VideoKitchen(this.logToReceipt);
+
     // PeerJS object
-    this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:3, config: {
+    this.peer = new Peer({ host: "peer.telekneipe.de", secure:true, path:"/peerjs", debug:2, config: {
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
@@ -36,52 +35,39 @@ export class Tableservice {
     this.peer.on('connection', (conn) => {
       // TODO: Ask user for connection permission?
       conn.on('open', () => {        
-        this.parent.askConnection(conn,false,() => {
-          this.trusted_peers.add(conn.peer)
-          this.data_peers[conn.peer] = conn;
-          this.logToReceipt(`${conn.peer} comes to you.`)
-          console.log("Sending video_peers");
-          console.log([...this.video_peers]);
-          conn.send({accept: true, peers: [...this.video_peers]});
-          this.handleData(connection);
-        }, 
-        () => {
+        this.parent.askConnection(conn,false)
+          .then(() => {
+            this.trusted_peers.add(conn.peer);
+            this.data_peers[conn.peer] = conn;
+            this.logToReceipt(`${conn.peer} comes to you.`);
+
+            console.log("Sending video_peers");
+            console.log([...this.video_peers]);
+
+            conn.send({accept: true, peers: [...this.video_peers]});
+
+            return this.handleData(connection);
+        }).catch(() => { 
           console.log("Connection rejected");
           this.banned_peers.add(conn.peer);
         });
       });
+
       conn.on('close', () => {
         this.data_peers[conn.peer] = undefined;
       });
 
-      
-      
-      
     });
 
     // Receiving a call
     this.peer.on('call', (call) => {
       // Answer the call automatically (instead of prompting user) for demo purposes
-      if (this.avclub.localStream == null) {
-        // do some emergency display action
-        // TODO
-        console.error("Received call before initialization of webcam or our webcam stopped")
+      if (!this.parent.getInCallMode() || !this.avclub.localStream) {
+        this.parent.askStream(call,false)
+        .then(this.parent.goInCallMode)
+        .then((stream) => {this.answerCall(call,stream)}); 
       }
-      call.answer(this.avclub.localStream);
-
-      this.avclub.processCall(call);
-
-      call.on("stream", () => {        
-        if (!this.video_peers.has(call.peer)) {
-                  this.logToReceipt(`${call.peer} sat down at the table`);                  
-                  this.video_peers.add(call.peer);
-        }            
-        
-      });
-      call.on("close", () => {
-        this.video_peers.delete(call.peer); 
-      });
-
+      this.answerCall(call);
     });
 
     this.peer.on('error', (err) => {
@@ -94,9 +80,43 @@ export class Tableservice {
 
   }
 
+  answerCall(call,stream) {
+    call.answer(stream || this.avclub.localStream);
+
+    this.avclub.processCall(call);
+
+    call.on("stream", () => {        
+      if (!this.video_peers.has(call.peer)) {
+                this.logToReceipt(`${call.peer} sat down at the table`);                  
+                this.video_peers.add(call.peer);
+      }            
+      
+    });
+    call.on("close", () => {
+      this.video_peers.delete(call.peer); 
+    });
+
+  }
+
+  sendNote(note,peerId) {
+    let recipiands = [];
+    if (peerId) {
+      recipiands.push(...peerId);
+    } else {
+      recipiands.push(...this.video_peers);
+    }
+    for (recipiand of recipiands) {
+      if (this.data_peers[recipiand] && this.data_peers[recipiand].open) {
+        this.data_peers[recipiand].send({note: note});
+      }
+    }
+  }
 
   handleData(connection) {
     connection.on('data', (data) => {
+      if (data.note) {
+        this.parent.logNote(connection.peer,data.note);
+      }
       // pass
     })
   }
@@ -130,7 +150,7 @@ export class Tableservice {
     // make new peer connection
     let connection = this.peer.connect(callerId);
     connection.on('open', () => {
-      connection.on('data',(data) => {
+      connection.once('data',(data) => {
         console.log(`Received data from remote ${callerId}`);
         console.log(data);
         if (data.accept) {

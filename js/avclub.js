@@ -343,6 +343,8 @@ export class VideoKitchen {
   processCall (call) {
     // Wait for stream on the call, then set peer video display
     call.on('stream', (stream) => {
+      console.log("New Stream received:");
+      console.log(stream);
       // BUG as per https://github.com/peers/peerjs/issues/609. Check if call.peer already in existingCalls, if so... ignore?
       // TODO: This might be a bad decision, since we might get a re-call try from our peer, which would be ignored here? Investigate.
       //if (existingCalls.has(call.peer)) return;
@@ -399,60 +401,72 @@ export class VideoKitchen {
       }
       };
 
-    if (this.debugForceAudio) {
-      this.initMicOnlyStream();
-      return;
+    if (this.debugForceAudio) {      
+      return this.initMicOnlyStream();
     }
 
-
-    if (!this.localStream) {
-      navigator.mediaDevices.getUserMedia(constraintsVideo)
-      .then(stream => {
-        this._hasVideo = true;
-        this.webcamvideo.srcObject = stream;
-        this.webcamvideo.play(); // TODO: Try without play for chrome's sake
-
-        // TODO: We need WebGl anyways for pixijs, so this is a bit pointless.
-        //if (!seriouslyFail && canvas.captureStream) {
-          // video effects are supported
-          this._seriously.go();
-          // mix streams for audio forwarding
-          this.localStream = this.webcamcanvas.captureStream();
-          this.localStream.addTrack(stream.getAudioTracks()[0]);
-        /*
-        } else {
-          // they are not, just capture webcam img. as fallback
-          localStream = stream;          
-        }*/
-
-        // create loopback video element and sprite
-        this.localFrame = new VideoFrame(this.localStream,true);
-        this.localFrame.videoElement.muted = true;
-    
-        //sprite to canvas
-        this.localFrame.container.y = this.app.renderer.height-235;
-        this.localFrame.container.x = 0;
+    return new Promise((resolve,reject) => {
 
 
-        this.app.stage.addChild(this.localFrame.container);
-        this.rescale()
+
+      if (!this.localStream) {
+        navigator.mediaDevices.getUserMedia(constraintsVideo)
+        .then(stream => {
+          this._hasVideo = true;
+          this.webcamvideo.srcObject = stream;
+          this.webcamvideo.play(); // TODO: Try without play for chrome's sake
+
+          // TODO: We need WebGl anyways for pixijs, so this is a bit pointless.
+          //if (!seriouslyFail && canvas.captureStream) {
+            // video effects are supported
+            this._seriously.go();
+            // mix streams for audio forwarding
+            this.localStream = this.webcamcanvas.captureStream();
+            for (track of stream.getAudioTracks()) {
+              this.localStream.addTrack(track);
+            }
+          /*
+          } else {
+            // they are not, just capture webcam img. as fallback
+            localStream = stream;          
+          }*/
+
+          // create loopback video element and sprite
+          this.localFrame = new VideoFrame(this.localStream,true);
+          this.localFrame.videoElement.muted = true;
+      
+          //sprite to canvas
+          this.localFrame.container.y = this.app.renderer.height-235;
+          this.localFrame.container.x = 0;
 
 
-        $("#hwaccess").hide();
-      })
-      .catch(error => {
-        if (error.name == "NotFoundError" || error.name == "OverconstrainedError") {
-          console.log("Could not get default device configuration, trying to get audio only");
-          this.initMicOnlyStream();
-        } else if (error.name == "NotAllowedError") {
-          console.log("Access not allowed. Ask user again");
-          $("#hwaccess-retry").show();
-        } else {
-          console.error("Unknown error accessing media devices.", error);
-          $("#hwaccess-error").show();
-        }
-        });
-    }
+          this.app.stage.addChild(this.localFrame.container);
+          this.rescale()
+
+
+          $("#hwaccess").hide();
+          resolve(this.localStream);
+        })
+        .catch(error => {
+          if (error.name == "NotFoundError" || error.name == "OverconstrainedError") {
+            console.log("Could not get default device configuration, trying to get audio only");
+            initMicOnlyStream().then(stream => {resolve(stream);}).catch(error => {reject(error)});
+          } else if (error.name == "NotAllowedError") {
+            console.log("Access not allowed. Ask user again");
+            $("#hwaccess-retry").show();
+            // Retry if getUserMedia fails
+            $('#hwaccess-retry-button').click(() => {
+              $('#hwaccess-retry').hide();
+              this.avclub.initWebcamStream().then((stream) => {resolve(stream)}).catch((error) => {reject(error)});
+            });            
+          } else {
+            console.error("Unknown error accessing media devices.", error);
+            $("#hwaccess-error").show();
+            reject(error)
+          }
+          });
+      }
+    });
   }
 
   initMicOnlyStream() {
@@ -462,38 +476,58 @@ export class VideoKitchen {
       },
       video: false
     };
+    return new Promise((resolve,reject) => {
+      if (!this.localStream) {
+        navigator.mediaDevices.getUserMedia(constraintsAudio)
+        .then(stream => {
+          this._hasVideo = false;
 
-    if (!this.localStream) {
-      navigator.mediaDevices.getUserMedia(constraintsAudio)
-      .then(stream => {
-        this._hasVideo = false;
+          // TODO: Either find a way to communicate audioOnly to remote, or add option to upload an avatar here.
 
-        this.localStream = stream;
+          // we need to send a video to get a video, unless we start implementing transceivers, which seems difficult with the current state of peerjs.
+          let black = ({width = 320, height = 320} = {}) => {
+            this.audiocanvas = Object.assign(document.createElement("canvas"), {width, height});
+            this.audiocanvas.getContext('2d').fillRect(0, 0, width, height);
+            return this.audiocanvas.captureStream();
+          }                   
 
-        // create audio sprite
-        this.localFrame = new AudioFrame(this.localStream,true);
-    
-        //sprite to canvas
-        this.localFrame.container.y = this.app.renderer.height-235;
-        this.localFrame.container.x = 0;
+          this.localStream = black();
+          for (track of stream.getAudioTracks()) {
+            this.localStream.addTrack(track);
+          }        
+
+          // create audio sprite
+          this.localFrame = new AudioFrame(this.localStream,true);
+      
+          //sprite to canvas
+          this.localFrame.container.y = this.app.renderer.height-235;
+          this.localFrame.container.x = 0;
 
 
-        this.app.stage.addChild(this.localFrame.container);
-        this.rescale()
+          this.app.stage.addChild(this.localFrame.container);
+          this.rescale()
 
 
-        $("#hwaccess").hide();
-      })
-      .catch(error => {
-        if (error.name == "NotAllowedError") {
-          console.log("Access not allowed. Ask user again");
-          $("#hwaccess-retry").show();
-        } else {
-          console.error("Unknown error accessing media devices.", error);
-          $("#hwaccess-error").show();
-        }
-        });
-    }
+          $("#hwaccess").hide();
+          resolve(this.localStream);
+        })
+        .catch(error => {
+          if (error.name == "NotAllowedError") {
+            console.log("Access not allowed. Ask user again");
+            $("#hwaccess-retry").show();
+            // Retry if getUserMedia fails
+            $('#hwaccess-retry-button').click(() => {
+              $('#hwaccess-retry').hide();
+              this.avclub.initMicOnlyStream().then((stream) => {resolve(stream)}).catch((error) => {reject(error)});
+            });
+          } else {
+            console.error("Unknown error accessing media devices.", error);
+            $("#hwaccess-error").show();
+            reject(error);
+          }
+          });
+      }
+    });
   }
 
   closeCalls() {

@@ -84,6 +84,7 @@
         ID: <span id="receiptId"></span>
         <img class="receipt-close" id="receiptButton" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAKUlEQVQImWP4//Hh//8fH/5nYGD4D2fDBGAYymdAUcnAwABRiVU7uiAA1xdF+JdYbBgAAAAASUVORK5CYII=";>
       </div>
+      <div class="receipt-peers" id="receiptPeers" />
       <div id="console">
       </div>
     </div>
@@ -99,7 +100,7 @@
         $(function() {
             var fab = start_fabulation(meta);
             try {
-              table = new Telekneipe();              
+              table = new Telekneipe(true);              
               table.registerUI();
               $.exposed = {table:table};
               if (table.lang == "en" && window.location.pathname.includes("index.html")) {
@@ -111,10 +112,10 @@
 
             } catch (err) {
               if (err.message.includes("WebGL unsupported")) {
-                $("#modalWarning").html("<p>Fehler: Dein Browser unterstützt kein WebGL. Leider ist die Telekneipe ohne WebGL zur Zeit nicht unterstützt.</p>");  
+                $("#modalWarning").html("Fehler: Dein Browser unterstützt keine WebGL. Bitte nutze die <a href=\"https://mini.telekneipe.de/\"> Telekneipe-Minibar.</a>");  
               }
               else {
-                $("#modalWarning").html(`<p>Warnung: Während der Initialisierung wurde ein unerwarteter Fehler festgestellt.</p><p>Fehlermeldung: ${err}</p>`);
+                $("#modalWarning").text(`Warnung: Während der Initialisierung wurde ein unerwarteter Fehler festgestellt. Fehlermeldung: ${err}.`);
                 throw(err);
               }
             } finally {
@@ -133,20 +134,18 @@
 
             // temporarily display info after first screen
             $('#catch_events').on("tableservice.about", function() {
-              if (table.skipCookies) {
+              if (table && table.skipCookies) {
                 table.clubMarke()
               } else {
                 $("#betaWarning").show();
               }
             });            
             // info box functionality
+            $(".modal-content").on('click', (event) => (event.stopPropagation()));            
             $("#betaWarningButton").click(function() {
               $("#betaWarning").fadeOut("slow");
-            });           
-            $(window).click(event, function(event) {
-              if (event.target==$("betaWarning"))
-                $("betaWarning").fadeOut("slow");
             });
+            $("#betaWarning").click('click',()=>{$("#betaWarning").fadeOut("slow");});
             // receipt functionality.
             $("#receiptButton").click(function() {
               $("#console").toggle();

@@ -32,8 +32,12 @@ function prepareModal(header,body,alert=false) {
 	alert ? $('#betaWarning').addClass("modal-warn-background") : $('#betaWarning').removeClass("modal-warn-background");
 }
 
-function showModal() {
+function showModal(onHide) {
 	$("#betaWarning").show();
+	$("#betaWarningButton").off('click');	
+	$("#betaWarning").on('click',()=>{hideModal(); if (onHide) onHide();});
+	$("#betaWarningButton").on('click',()=>{hideModal(); if (onHide) onHide();});
+
 }
 
 function hideModal() {
