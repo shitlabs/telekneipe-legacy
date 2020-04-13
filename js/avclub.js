@@ -450,7 +450,7 @@ export class VideoKitchen {
         .catch(error => {
           if (error.name == "NotFoundError" || error.name == "OverconstrainedError") {
             console.log("Could not get default device configuration, trying to get audio only");
-            initMicOnlyStream().then(stream => {resolve(stream);}).catch(error => {reject(error)});
+            this.initMicOnlyStream().then(stream => {resolve(stream);}).catch(error => {reject(error)});
           } else if (error.name == "NotAllowedError") {
             console.log("Access not allowed. Ask user again");
             $("#hwaccess-retry").show();

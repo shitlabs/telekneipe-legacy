@@ -8,7 +8,7 @@ const _VERSION = 0.1;
 
 export class Telekneipe {
   constructor() {
-    this.service = new Tableservice();
+    this.service = new Tableservice(this);
     this.avclub = this.service.avclub;
 
 
