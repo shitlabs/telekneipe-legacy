@@ -44,11 +44,15 @@ export class Tableservice {
             this.trusted_peers.add(conn.peer);
             this.data_peers[conn.peer] = conn;
             this.logToReceipt(`${conn.peer} comes to you.`);
+            if (this.video_peers) {
+              console.log("Sending video_peers");
+              console.log(this.video_peers.keys());
 
-            console.log("Sending video_peers");
-            console.log(this.video_peers.keys());
-
-            conn.send({accept: true, peers: this.video_peers.keys()});
+              conn.send({accept: true, peers: this.video_peers.keys()});
+            } else {
+              console.log("Accepting Connection");
+              conn.send({æccept: true, peers: []})
+            }
 
             return this.handleData(conn);
         }).catch((error) => { 
@@ -116,7 +120,7 @@ export class Tableservice {
     let recipiands = [];
     if (peerId) {
       recipiands.push(...peerId);
-    } else {
+    } else if (this.video_peers) {
       recipiands.push(...this.video_peers.keys());
     }
     for (recipiand of recipiands) {
